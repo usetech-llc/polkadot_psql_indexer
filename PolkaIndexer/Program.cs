@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Polkadot.Api;
+using System;
 
 namespace PolkaIndexer
 {
@@ -6,7 +7,21 @@ namespace PolkaIndexer
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Schema sch = new Schema();
+
+            using (IApplication app = PolkaApi.GetAppication())
+            {
+                app.Connect("wss://kusama-rpc.polkadot.io/");
+
+                var metadata = app.GetMetadata(null);
+                
+                sch.ParseMetadata(metadata);
+
+                app.Disconnect();
+            }
+
+
+            Console.ReadLine();
         }
     }
 }

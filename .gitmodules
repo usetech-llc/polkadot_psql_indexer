@@ -1,0 +1,3 @@
+[submodule "lib/api"]
+	path = lib/api
+	url = https://github.com/usetech-llc/polkadot_api_dotnet
