@@ -4,7 +4,7 @@
 
 Example:
 
-```
+```csharp
 internal class BalancesTransferTransaction : ISpecificTransaction {
     private IDatabaseAdapdable _dbAdapter;
     private Metadata _metadata;
@@ -35,7 +35,7 @@ internal class BalancesTransferTransaction : ISpecificTransaction {
 In the `Execute` method write values as needed using IDatabaseAdapdable. 
 
 Example:
-```
+```csharp
 public void Execute()
 {
     // Set FREEBALANCE for participants
@@ -114,7 +114,7 @@ public void Execute()
 In the `Parse` method parse the extrinsic and return `True` if this extrinsic has the transaction type that is being added.
 
 Example
-```
+```csharp
 public bool Parse(SignedBlock sb, string extrinsic)
 {
     var parse = extrinsic;
@@ -187,7 +187,7 @@ public bool Parse(SignedBlock sb, string extrinsic)
 2. In TransactionFactory.cs file add an instance of new transaction to list _specificTransactions.
 
 Example:
-```
+```csharp
 _specificTransactions = new List<ISpecificTransaction>
 {
 ...
