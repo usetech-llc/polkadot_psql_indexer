@@ -1,4 +1,7 @@
-﻿using Polkadot.Api;
+﻿using Newtonsoft.Json.Linq;
+using Polkadot.Api;
+using Polkadot.Data;
+using Polkadot.Utils;
 using PolkaIndexer.DAL;
 using System;
 using System.Configuration;
@@ -13,7 +16,8 @@ namespace PolkaIndexer
 
             using (IApplication app = PolkaApi.GetAppication())
             {
-                app.Connect("wss://kusama-rpc.polkadot.io/");
+                string nodeUrl = ConfigurationManager.ConnectionStrings["Substrate"].NodeUrl;
+                app.Connect(nodeUrl);
 
                 // Connect to db and check metadata version
                 var postgres = new Postgres(ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString);
