@@ -41,16 +41,16 @@ namespace PolkaIndexer
             }
         }
 
-        public void ParseBlockDbg(SignedBlock block, MetadataV8 md)
-        {
-            var tf = new TransactionFactory(new Metadata(md), _databaseAdapdable);
+        //public void ParseBlockDbg(SignedBlock block, MetadataV8 md)
+        //{
+        //    var tf = new TransactionFactory(new Metadata(md), _databaseAdapdable);
 
-            foreach (var extrinsic in block.Block.Extrinsic)
-            {
-                var specificTransaction = tf.GetTransactionSpecific(block, extrinsic);
-                specificTransaction.Execute();
-            }
-        }
+        //    foreach (var extrinsic in block.Block.Extrinsic)
+        //    {
+        //        var specificTransaction = tf.GetTransactionSpecific(block, extrinsic);
+        //        specificTransaction.Execute();
+        //    }
+        //}
 
         public void ParseBlock(BlockHash blockHash)
         {
