@@ -50,13 +50,40 @@ postgres=# \d
 In the output expect to see the tables that match metadata schema of the connected node. For exmaple, for the Kusama network:
 
 ```
-TBD
+                                List of relations
+ Schema |                       Name                       |   Type   |  Owner   
+--------+--------------------------------------------------+----------+----------
+ public | attestationscallmore_attestations                | table    | postgres
+ public | attestationscallmore_attestations_id_seq         | sequence | postgres
+ public | attestationsdidupdate                            | table    | postgres
+ public | attestationsparablockattestations                | table    | postgres
+ public | attestationsparablockattestations_key_seq        | sequence | postgres
+ public | attestationsrecentparablocks                     | table    | postgres
+ public | attestationsrecentparablocks_key_seq             | sequence | postgres
+ public | authoritydiscoverycall                           | table    | postgres
+ public | authoritydiscoverycall_id_seq                    | sequence | postgres
+ public | authorshipauthor                                 | table    | postgres
+ public | authorshipcallset_uncles                         | table    | postgres
+ public | authorshipcallset_uncles_id_seq                  | sequence | postgres
+ public | authorshipdidsetuncles                           | table    | postgres
+ public | authorshipuncles                                 | table    | postgres
+ public | babeauthorities                                  | table    | postgres
+ public | babecall                                         | table    | postgres
+...
 ```
 
 Example of a simple value is `balances.freeBalance` table. In order to see the schema of this table type:
 
 ```
-TBD
+postgres=# \d balancesfreebalance;
+                                      Table "public.balancesfreebalance"
+   Column    |         Type          | Collation | Nullable |                     Default                      
+-------------+-----------------------+-----------+----------+--------------------------------------------------
+ key         | integer               |           | not null | nextval('balancesfreebalance_key_seq'::regclass)
+ value       | character varying(40) |           |          | 
+ blocknumber | character varying[]   |           |          | 
+Indexes:
+    "balancesfreebalance_pkey" PRIMARY KEY, btree (key)
 ```
 
 #### Database Tables are created for vector values...
