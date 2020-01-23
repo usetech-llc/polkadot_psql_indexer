@@ -217,10 +217,9 @@ namespace PolkaIndexer.DAL
                 {
                     var com = db.CreateCommand();
                     com.CommandText = sqlText;
-                    com.ExecuteScalar();
-                    result = true;
+                    result = com.ExecuteScalar();
                 }
-                catch(Exception e)
+                catch(Exception)
                 {
                     result = null;
                 }
@@ -300,7 +299,7 @@ namespace PolkaIndexer.DAL
             var blockNumberType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.BlockNumber);
             var skeyType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Key);
             var svalueType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Value);
-            return $"key SERIAL PRIMARY KEY, {Environment.NewLine} value {svalueType}, {Environment.NewLine} blockNumber {blockNumberType}";
+            return $"id SERIAL PRIMARY KEY, key { skeyType }, {Environment.NewLine} value {svalueType}, {Environment.NewLine} blockNumber {blockNumberType}";
         }
 
         public string DoubleMapRowSqlString(DoubleMapRowSchema rowSchema)
@@ -309,7 +308,7 @@ namespace PolkaIndexer.DAL
             var skeyType1 = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Key1);
             var skeyType2 = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Key2);
             var svalueType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Value);
-            return $"key SERIAL PRIMARY KEY {Environment.NewLine}, key2 {skeyType2}, {Environment.NewLine} value {svalueType}, {Environment.NewLine} blockNumber {blockNumberType}";
+            return $"id SERIAL PRIMARY KEY, key {skeyType1} {Environment.NewLine}, key2 {skeyType2}, {Environment.NewLine} value {svalueType}, {Environment.NewLine} blockNumber {blockNumberType}";
         }
 
         public string CallRowSchemaSqlString(CallRowSchema rowSchema)
@@ -530,7 +529,7 @@ namespace PolkaIndexer.DAL
 
         public void SetSettingValue(string name, string value)
         {
-            var sql = $"UPDATE Settings SET value = '{value}' WHERE name = '{name}'";
+            var sql = $"UPDATE Settings SET value = '{value}' WHERE name = '{name}' RETURNING value";
             var success = ExecuteCommandInsideConnection(sql);
 
             // variable is not set
