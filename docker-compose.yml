@@ -1,0 +1,23 @@
+version: "3"
+networks:
+  indexer_net:
+    external: false
+
+services:
+  indexer:
+    networks:
+      - indexer_net
+    build:
+#      context: ./PolkaIndexer
+      dockerfile: Dockerfile
+  database:
+    image: postgres
+    env_file:
+     - database.env    
+    volumes:
+     - db-data:/var/lib/postgresql/data/
+    ports:
+     - 5432:5432
+
+volumes:
+  db-data:

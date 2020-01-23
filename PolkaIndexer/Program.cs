@@ -253,7 +253,8 @@ namespace PolkaIndexer
 
             using (IApplication app = PolkaApi.GetAppication())
             {
-                app.Connect("wss://kusama-rpc.polkadot.io/");
+                string nodeUrl = ConfigurationManager.ConnectionStrings["Substrate"].NodeUrl;
+                app.Connect(nodeUrl);
 
                 // Connect to db and check metadata version
                 var postgres = new Postgres(ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString);

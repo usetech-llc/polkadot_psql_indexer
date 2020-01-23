@@ -2,6 +2,6 @@
 <configuration>
   <connectionStrings>
     <add name="Postgres" connectionString="Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=" />
-    <add name="Substrate" nodeUrl="ws://localhost:9944/" />
+    <add name="Substrate" nodeUrl="wss://kusama-rpc.polkadot.io/" />
   </connectionStrings>
 </configuration>
