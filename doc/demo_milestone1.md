@@ -13,6 +13,7 @@ For convenience the docker-compose file is provided that brings up all needed co
 Open a teminal window for DB interaction and run commands to bring database up and connect to it. The `\d` command will display `Did not find any relations.` because the Indexer has not run yet, this is expected.
 
 ```
+$ docker-compose build database
 $ docker-compose up -d database
 $ docker-compose run database bash
 # psql --host=database --username=postgres dbname=postgres
@@ -32,6 +33,7 @@ Execute the following commands in a new terminal window. Indexer will be built a
 ```
 $ git submodule init
 $ git submodule update
+$ docker-compose build indexer
 $ docker-compose up -d indexer
 ```
 

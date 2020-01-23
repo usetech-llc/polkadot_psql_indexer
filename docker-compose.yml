@@ -4,20 +4,24 @@ networks:
     external: false
 
 services:
-  indexer:
-    networks:
-      - indexer_net
-    build:
-      context: .
-      dockerfile: Dockerfile
   database:
     image: postgres
+    networks:
+     - indexer_net
     env_file:
      - database.env    
     volumes:
      - db-data:/var/lib/postgresql/data/
     ports:
      - 5432:5432
+  indexer:
+    depends_on:
+      - database
+    networks:
+      - indexer_net
+    build:
+      context: .
+      dockerfile: Dockerfile
 
 volumes:
   db-data:
