@@ -72,41 +72,72 @@ In the output expect to see the tables that match metadata schema of the connect
 ...
 ```
 
-Example of a simple value is `balances.freeBalance` table. In order to see the schema of this table type:
+Example of a simple value is `balancesfreebalance` table. In order to see the schema of this table type:
 
 ```
 postgres=# \d balancesfreebalance;
                                       Table "public.balancesfreebalance"
-   Column    |         Type          | Collation | Nullable |                     Default                      
--------------+-----------------------+-----------+----------+--------------------------------------------------
- key         | integer               |           | not null | nextval('balancesfreebalance_key_seq'::regclass)
+   Column    |         Type          | Collation | Nullable |                     Default                     
+-------------+-----------------------+-----------+----------+-------------------------------------------------
+ id          | integer               |           | not null | nextval('balancesfreebalance_id_seq'::regclass)
+ key         | character varying(50) |           |          | 
  value       | character varying(40) |           |          | 
  blocknumber | character varying[]   |           |          | 
 Indexes:
-    "balancesfreebalance_pkey" PRIMARY KEY, btree (key)
+    "balancesfreebalance_pkey" PRIMARY KEY, btree (id)
 ```
 
 #### Database Tables are created for vector values...
 
-`balances.locks` is an example of a vector value. Read the schema of this table:
+`balanceslocks` is an example of a vector value. Read the schema of this table:
 
 ```
-TBD
+postgres=# \d balanceslocks;
+                                      Table "public.balanceslocks"
+   Column    |         Type          | Collation | Nullable |                  Default                  
+-------------+-----------------------+-----------+----------+-------------------------------------------
+ id          | integer               |           | not null | nextval('balanceslocks_id_seq'::regclass)
+ key         | character varying(50) |           |          | 
+ value       | character varying[]   |           |          | 
+ blocknumber | character varying[]   |           |          | 
+Indexes:
+    "balanceslocks_pkey" PRIMARY KEY, btree (id)
 ```
+
+Note that schemas of simple and vector values are very similar. This is achieved by introducing an id field for each table, which allowed to avoid relying on `key` field as the record unique identifier.
+
 
 #### Database tables are created for transactions for all calls in metadata
 
-`balances.transfers` is an example of a transaction table. Read the schema of this table:
+Transaction tables are named as <Module Name><"call"><Call Name>.
+
+`balancescalltransfers` is an example of a transaction table. Read the schema of this table:
 
 ```
-TBD
+postgres=# \d balancescalltransfer;
+                                     Table "public.balancescalltransfer"
+   Column    |        Type         | Collation | Nullable |                     Default                      
+-------------+---------------------+-----------+----------+--------------------------------------------------
+ id          | integer             |           | not null | nextval('balancescalltransfer_id_seq'::regclass)
+ Hash        | character varying[] |           |          | 
+ Sender      | character varying[] |           |          | 
+ Status      | character varying[] |           |          | 
+ Block       | character varying[] |           |          | 
+ Timestamp   | character varying[] |           |          | 
+ Nonce       | character varying[] |           |          | 
+ Signature   | character varying[] |           |          | 
+ dest        | character varying[] |           |          | 
+ value       | character varying[] |           |          | 
+ blocknumber | character varying[] |           |          | 
+Indexes:
+    "balancescalltransfer_pkey" PRIMARY KEY, btree (id)
 ```
 
 ### Indexer
 
 #### Block scanner monitors blocks and parses for subset of well-known transactions
 
-All of the following tables are populated and can be checked with `SELECT * FROM ...;` command (replace `...` with table name):
+All of the following tables are populated and can be checked with `SELECT * FROM ...;` command (replace `...` with table name). For convenience, we left a dot in the middle of the table name, which should be replaced with "call" when talbe is queries in the DB. For example, `balancescalltransfer` or `stakingcallbond`:
 
 * Balances.transfer
 * Balances.set_balance
@@ -129,15 +160,75 @@ All of the following tables are populated and can be checked with `SELECT * FROM
 * Democracy.second
 * Democracy.vote
 * Democracy.cancel_referendum
+
+To speed the process up, stop indexer, manually update lastParsedBlock in settings table to 700,000 and restart indexer:
+
+In teminal window 2:
+```
+docker stop polkadot_ent_dotnet_indexer_1
+```
+
+In terminal window connected to DB:
+```
+postgres=# update settings set value=700000;
+```
+
+In teminal window 2:
+```
+docker start polkadot_ent_dotnet_indexer_1
+```
+
+Now wait 1-2 minutes while indexer picks up again and check the DB:
+```
+postgres=# select * from settings;
+      name       | value  
+-----------------+--------
+ lastParsedBlock | 700023
+(1 row)
+
+postgres=# select * from balancesfreebalance;
+ id | key |         value          | blocknumber 
+----+-----+------------------------+-------------
+  1 |     | {18446414073709551616} | {700050}
+  2 |     | {330000000000000}      | {700050}
+(2 rows)
+
+postgres=# select * from balancesfreebalance;
+ id | key |         value          | blocknumber 
+----+-----+------------------------+-------------
+  1 |     | {18446414073709551616} | {700050}
+  2 |     | {330000000000000}      | {700050}
+(2 rows)
+
+postgres=# select * from balancescalltransfer;
+ id | Hash |                               Sender                               | Status | Block | Timestamp | Nonce | Signature |                                dest 
+                               |       value       | blocknumber 
+----+------+--------------------------------------------------------------------+--------+-------+-----------+-------+-----------+-------------------------------------
+-------------------------------+-------------------+-------------
+  1 |      | {66ca5dce73446df7a6fd773daf7b50afe77bee87fc0299616ef6c1f88291a73d} |        |       |           |       |           | {1f02163bc259cee1ec02da15d0c580f9876
+4583276c19ee6192cd45220a5a19f} | {330000000000000} | 
+(1 row)
+```
+
+
+##### Nicks Module
+
+Nicks module was probably removed from Kusama because we were unable to see it in Metadata (or any other networks), so these tables are not created and not populated:
+
 * Nicks.set_name
 * Nicks.clear_name
 
 #### Block scanner is capable of receiving new blocks as well as scanning old blocks
 
-Wait a few minutes while block scanner works. Then check the `Balances.transfer` table. You will see old blocks as well as newest blocks that were finalized after indexer was started.
+First, check the `settings` table. It contains the `lastParsedBlock` entry, which is constantly increasing (run several queries and see). When the `lastParsedBlock` reaches the current block, scanning will slow down and continue as new blocks are validated and published on-chain. 
 
 ```
-TBD
+postgres=# select * from settings;
+      name       | value 
+-----------------+-------
+ lastParsedBlock | 52
+(1 row)
+
 ```
 
 #### Data is Parsed
@@ -148,10 +239,15 @@ TBD
 * Vector values tables are populated based on new and scanned blocks
 * Transaction tables are populated based on new and scanned blocks
 
-See the `Balances.freeBalance`, `Balances.locks`, `Balances.transfer`, and `Staking.nominate` table rows. Data in the rows is structured by human meaningful fields and is not binary data that comes from Substrate, which means it was parsed.
+See the `balancesfreebalance`, `balancescalltransfer`, and `stakingcallnominate` table rows. Data in the rows is structured by human meaningful fields and is not binary data that comes from Substrate, which means it was parsed.
 
 ```
-TBD
+postgres=# select * from balancesfreebalance;
+...
+postgres=# select * from balancescalltransfer;
+...
+postgres=# select * from stakingcallnominate;
+...
 ```
 
 #### Documentation for adding new transaction types for existing or new modules to be parsed for state changes
