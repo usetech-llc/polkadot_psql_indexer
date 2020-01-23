@@ -1,6 +1,6 @@
 # Manual Demos
 
-Milestone 1 deliverables are marked by tag [milestone1](https://github.com/usetech-llc/polkadot_ent_dotnet/tree/milestone1)
+Milestone 1 deliverables are marked by tag [milestone1](https://github.com/usetech-llc/polkadot_psql_indexer/tree/milestone1)
 
 ## Milestone 1
 
