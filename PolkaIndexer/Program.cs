@@ -1,7 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using Polkadot.Api;
-using Polkadot.Data;
-using Polkadot.Utils;
+﻿using Polkadot.Api;
 using PolkaIndexer.DAL;
 using System;
 using System.Configuration;
@@ -16,7 +13,7 @@ namespace PolkaIndexer
 
             using (IApplication app = PolkaApi.GetAppication())
             {
-                string nodeUrl = ConfigurationManager.ConnectionStrings["Substrate"].NodeUrl;
+                string nodeUrl = ConfigurationManager.AppSettings["Substrate"];
                 app.Connect(nodeUrl);
 
                 // Connect to db and check metadata version
