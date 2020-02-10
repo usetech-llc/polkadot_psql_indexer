@@ -9,10 +9,12 @@ using System.Linq;
 using System.ComponentModel;
 using Polkadot.Data;
 using System.Data;
+using Polkadot.Api;
+using PolkaIndexer.WebApi;
 
 namespace PolkaIndexer.DAL
 {
-    public class Postgres : IDatabaseAdapdable
+    public class Postgres : IDatabaseDataReader
     {
         private string _connectionString;
         private SubstrateUtils _substrateUtils;
@@ -129,6 +131,12 @@ namespace PolkaIndexer.DAL
             { SubstrateType.ParaId , DataType.ParaId },
         };
 
+        public static string GetConnectionString()
+        {
+            //return ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString;
+            return "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=";
+        }
+
         public Postgres(string connectionString)
         {
            _connectionString = connectionString;
@@ -165,31 +173,7 @@ namespace PolkaIndexer.DAL
                         for (var i = 0; i < itm.Count(); i++)
                         {
                             object rowValue;
-                            //try
-                            //{
-                                // get as string 
-                                rowValue = itm.ElementAt(i).ToString();
-                            //}
-                            //catch (Exception e)
-                            //{
-                                //try
-                                //{
-                                //    // get as numeric 
-                                //    rowValue = reader.ElementAt(i);
-                                //}
-                                //catch (Exception e1)
-                                //{
-                                //    try
-                                //    {
-                                //        // get as numeric 
-                                //        rowValue = reader.ElementAt(i);
-                                //    }
-                                //    catch (Exception e2)
-                                //    {
-                                //        throw e2;
-                                //    }
-                                //}
-                           //}
+                            rowValue = itm.ElementAt(i).ToString();
                             row.Add(rowValue);
                         }
 
@@ -259,6 +243,8 @@ namespace PolkaIndexer.DAL
                 }
                                
                 WriteSystemInfo(systemInfo);
+
+                //var tables = string.Join(",", schema.DatabaseSchema.TableList.Select(i => i.Title));
 
                 db.Close();
             }
@@ -548,5 +534,53 @@ namespace PolkaIndexer.DAL
 
             return result == 2;
         }
+
+        #region WebApi
+
+        public Block GetBlockByNumber(string number)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Block GetBlockByHash(string hash)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Extrinsic GetTransactionByHash(string hash)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Extrinsic> GetFilteredTransactionList(TransactionFilter addressFrom, int limit, int offset)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<string> GetTransactionList(string[] tablesSql, string filterSql)
+        {
+            var extrinsicList = new List<string>();
+
+            foreach (var t in tablesSql)
+            {
+                var sql = $"SELECT * FROM {t}";
+
+                if (filterSql.Count() > 0)
+                {
+                    sql += $" WHERE {filterSql}";
+                }
+
+                var result = ExecuteReaderInsideConnection(sql);
+
+                foreach (var i in result)
+                {
+                    extrinsicList.Add(i.FirstOrDefault().ToString());
+                }
+            }
+
+            return extrinsicList;
+        }
+
+        #endregion
     }
 }

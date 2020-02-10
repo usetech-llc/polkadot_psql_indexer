@@ -1,8 +1,17 @@
-﻿using Polkadot.Data;
+﻿using Polkadot.Api;
+using Polkadot.Data;
 using System.Collections.Generic;
 
 namespace PolkaIndexer.DAL
 {
+    public interface IDatabaseDataReader : IDatabaseAdapdable
+    {
+        Block GetBlockByHash(string hash);
+        Block GetBlockByNumber(string number);
+        Extrinsic GetTransactionByHash(string hash);
+        IEnumerable<string> GetTransactionList(string[] tablesSql, string filterSql);
+    }
+
     public interface IDatabaseAdapdable
     {
         void Commit(MetadataSchema schema, SystemInfo systemInfo);

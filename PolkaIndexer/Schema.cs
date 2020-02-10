@@ -3,6 +3,7 @@ using Polkadot.DataStructs.Metadata;
 using PolkaIndexer.DAL;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PolkaIndexer
 {
@@ -18,6 +19,26 @@ namespace PolkaIndexer
         public RowSchema()
         {
             UseBlockNumber = true;
+        }
+
+        public bool ContainRow(string rowName)
+        {
+            if (this is MapRowSchema mrs)
+            {
+                return mrs.Key.Equals(rowName);
+            }
+
+            if (this is DoubleMapRowSchema dmrs)
+            {
+                return dmrs.Key1.Equals(rowName) || dmrs.Key2.Equals(rowName);
+            }
+
+            if (this is CallRowSchema crs)
+            {
+                return crs.Args.Any(i => i.Key.Equals(rowName));
+            }
+
+            return false;
         }
 
         public string BlockNumber { get; set; }
