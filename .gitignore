@@ -333,3 +333,9 @@ Schnorrkel/
 
 # Database volume
 data/
+
+# Angular compiled files
+**/dist
+
+# Config file for Angular app
+**/environment.ts

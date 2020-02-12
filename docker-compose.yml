@@ -22,6 +22,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-
+  api:
+    depends_on:
+      - database
+    networks:
+      - indexer_net
+    ports:
+      - 80:80
+      - 443:443
+    build:
+      context: .
+      dockerfile: WebApi/Dockerfile
+    
 volumes:
   db-data:
