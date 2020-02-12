@@ -9,7 +9,7 @@ namespace PolkaIndexer.DAL
         Block GetBlockByHash(string hash);
         Block GetBlockByNumber(string number);
         Extrinsic GetTransactionByHash(string hash);
-        IEnumerable<string> GetTransactionList(string[] tablesSql, string filterSql);
+        Dictionary<string, IEnumerable<string>> GetTransactionList(string[] tablesSql, string filterSql);
     }
 
     public interface IDatabaseAdapdable

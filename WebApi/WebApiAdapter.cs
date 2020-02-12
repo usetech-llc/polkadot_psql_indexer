@@ -31,7 +31,7 @@ namespace WebApi
             return _reader.GetBlockByNumber(number);
         }
 
-        public IEnumerable<string> GetFilteredTransactionList(TransactionFilter filter, int limit, int offset)
+        public Dictionary<TableSchema, IEnumerable<string>> GetFilteredTransactionList(TransactionFilter filter, int limit, int offset)
         {
             var filterList = new List<string>();
             var tables = _md.DatabaseSchema.TableList.ToList();
@@ -39,13 +39,13 @@ namespace WebApi
             // Build sql query 
             if (UriParse.NotNullOrEmpty(filter.AddressTo))
             {
-                tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Rows.ContainRow("dest")));
+                tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Rows.GetRowNumber("dest") > -1));
                 filterList.Add($" dest = {filter.AddressTo}");
             }
 
             if (UriParse.NotNullOrEmpty(filter.AddressFrom))
             {
-                tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Rows.ContainRow("Sender")));
+                tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Rows.GetRowNumber("Sender") > -1));
                 filterList.Add($" Sender = {filter.AddressFrom}");
             }
 
@@ -60,8 +60,18 @@ namespace WebApi
             }
 
             var filterSql = string.Join(",", filterList);
+            var data = _reader.GetTransactionList(tables.Select(i => i.Title).ToArray(), filterSql);
 
-            return _reader.GetTransactionList(tables.Select(i => i.Title).ToArray(), filterSql);
+            var dic = new Dictionary<TableSchema, IEnumerable<string>>();
+
+            int num = 0;
+            foreach (var di in data)
+            {
+                dic.Add(tables.FirstOrDefault(i => i.Title.Equals(di.Key)), di.Value);
+                num++;
+            }
+
+            return dic;
         }
 
         public Extrinsic GetTransactionByHash(string hash)

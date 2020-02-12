@@ -10,6 +10,6 @@ namespace PolkaIndexer.DAL
         Block GetBlockByNumber(string number);
         Block GetBlockByHash(string hash);
         Extrinsic GetTransactionByHash(string hash);
-        IEnumerable<string> GetFilteredTransactionList(TransactionFilter filter, int limit, int offset);
+        Dictionary<TableSchema, IEnumerable<string>> GetFilteredTransactionList(TransactionFilter filter, int limit, int offset);
     }
 }

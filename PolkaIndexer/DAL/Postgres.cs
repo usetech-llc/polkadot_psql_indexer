@@ -173,7 +173,7 @@ namespace PolkaIndexer.DAL
                         for (var i = 0; i < itm.Count(); i++)
                         {
                             object rowValue;
-                            rowValue = itm.ElementAt(i).ToString();
+                            rowValue = itm.ElementAt(i);
                             row.Add(rowValue);
                         }
 
@@ -557,9 +557,9 @@ namespace PolkaIndexer.DAL
             throw new NotImplementedException();
         }
 
-        public IEnumerable<string> GetTransactionList(string[] tablesSql, string filterSql)
+        public Dictionary<string, IEnumerable<string>> GetTransactionList(string[] tablesSql, string filterSql)
         {
-            var extrinsicList = new List<string>();
+            var extrinsicList = new Dictionary<string, IEnumerable<string>>();
 
             foreach (var t in tablesSql)
             {
@@ -571,11 +571,27 @@ namespace PolkaIndexer.DAL
                 }
 
                 var result = ExecuteReaderInsideConnection(sql);
+                var row = new List<string>();
 
-                foreach (var i in result)
+                foreach (var r in result)
                 {
-                    extrinsicList.Add(i.FirstOrDefault().ToString());
+                    foreach (var i in r)
+                    {
+                        Type valueType = i.GetType();
+                        if (valueType.IsArray)
+                        {
+                            row.Add(((string[])i)[0].ToString());
+                        }
+                        else
+                        {
+                            row.Add(i.ToString());
+                        }
+                    }
                 }
+
+
+                if (row.Count > 0)
+                    extrinsicList.Add(t, row);
             }
 
             return extrinsicList;
