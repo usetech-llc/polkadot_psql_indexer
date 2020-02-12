@@ -17,19 +17,35 @@ namespace WebApi
         }
 
         public IConfiguration Configuration { get; }
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            MetadataSchema sch = new MetadataSchema();
-            using (IApplication app = PolkaApi.GetAppication())
+            services.AddCors(options =>
             {
-                app.Connect("wss://kusama-rpc.polkadot.io/");
-                sch.ParseMetadata(app.GetMetadata(null));
-                app.Disconnect();
-            }
+                options.AddPolicy(MyAllowSpecificOrigins,
+                builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+                });
+            });
+
+
+            MetadataSchema sch = MetadataSchema.GetDbg();
+
+            //MetadataSchema sch = new MetadataSchema();
+            //using (IApplication app = PolkaApi.GetAppication())
+            //{
+            //    app.Connect("wss://kusama-rpc.polkadot.io/");
+            //    sch.ParseMetadata(app.GetMetadata(null));
+            //    app.Disconnect();
+            //}
 
             var dataReader = new Postgres(Postgres.GetConnectionString());
             services.AddSingleton(sch);
@@ -50,7 +66,10 @@ namespace WebApi
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            app.UseCors(MyAllowSpecificOrigins);
+
+            //app.UseHttpsRedirection();
+            //app.UseO
             app.UseMvc();
         }
     }

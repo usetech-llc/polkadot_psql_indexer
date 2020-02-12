@@ -6,7 +6,7 @@
 
 export const environment = {
   production: false,
-  jsonApiRootUrl: 'https://polkascan.io/kusama-cc3/api/v1/',
+  jsonApiRootUrl: 'http://localhost:5000/',
   networkName: 'Kusama',
   networkTokenSymbol: 'KSM',
   networkTokenDecimals: 12

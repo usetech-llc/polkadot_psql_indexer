@@ -52,7 +52,13 @@ namespace WebApi.Tools
 
         public static bool NotNullOrEmpty(string str)
         {
-            return !((!str.Equals(string.Empty)) || str != null);
+            if (str == null)
+                return false;
+
+            if (str.Equals(string.Empty))
+                return false;
+
+            return true;
         }
 
         public static string TryGetValue(Dictionary<string, Dictionary<string, string>> parsedPolkaUri, string path1, string path2)

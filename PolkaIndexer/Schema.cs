@@ -1,8 +1,11 @@
-﻿using Polkadot.Data;
+﻿using Newtonsoft.Json.Linq;
+using Polkadot.Data;
+using Polkadot.DataFactory.Metadata;
 using Polkadot.DataStructs.Metadata;
 using PolkaIndexer.DAL;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace PolkaIndexer
@@ -21,24 +24,39 @@ namespace PolkaIndexer
             UseBlockNumber = true;
         }
 
-        public bool ContainRow(string rowName)
+        public int GetRowNumber(string rowName)
         {
             if (this is MapRowSchema mrs)
             {
-                return mrs.Key.Equals(rowName);
+                if (mrs.Key.Equals(rowName))
+                {
+                    return 0;
+                }
             }
 
             if (this is DoubleMapRowSchema dmrs)
             {
-                return dmrs.Key1.Equals(rowName) || dmrs.Key2.Equals(rowName);
+                if (dmrs.Key1.Equals(rowName))
+                    return 0;
+
+                if (dmrs.Key2.Equals(rowName))
+                    return 1;
             }
 
             if (this is CallRowSchema crs)
             {
-                return crs.Args.Any(i => i.Key.Equals(rowName));
+                int i = 0;
+                foreach(var item in crs.Args)
+                {
+                    if (item.Key.Equals(rowName))
+                    {
+                        return i;
+                    }
+                    i++;
+                }
             }
 
-            return false;
+            return -1;
         }
 
         public string BlockNumber { get; set; }
@@ -80,6 +98,8 @@ namespace PolkaIndexer
     public class TableSchema
     {
         public string Title { get; set; }
+        public string ModuleName { get; set; }
+        public string MethodName { get; set; }
         public RowSchema Rows { get; set; }
     }
 
@@ -102,6 +122,20 @@ namespace PolkaIndexer
         {
         }
 
+        public static MetadataSchema GetDbg()
+        {
+            var md = string.Join(' ', File.ReadAllLines("md.txt"));
+            var s = JObject.Parse(md);
+
+            var p = new ParseMetadataV8();
+            var mdDbg = p.Parse(s);
+
+             var res = new MetadataSchema();
+            res.ParseMetadata(mdDbg);
+
+            return res;
+        }
+
         public void ParseMetadata(MetadataBase metadata)
         {
             DatabaseSchema = new DatabaseSchema { Title = $"Schema_{metadata.Version}" };
@@ -122,7 +156,11 @@ namespace PolkaIndexer
                         for (int j = 0; j < mv8.Module[i].Storage.Items.Length; j++)
                         {
                             string tableName = $"{moduleName}{mv8.Module[i].Storage.Items[j].Name}";
-                            var ts = new TableSchema { Title = tableName };
+                            var ts = new TableSchema {
+                                Title = tableName,
+                                ModuleName = moduleName,
+                                MethodName = mv8.Module[i].Storage.Items[j].Name
+                            };
                             DatabaseSchema.TableList.Add(ts);
 
                             if (mv8.Module[i].Storage.Items[j].Type.Type == 0) // Plain
@@ -154,7 +192,12 @@ namespace PolkaIndexer
                         var item = mv8.Module[i].Call[j];
 
                         string tableName = $"{moduleName}Call{item.Name}";
-                        var ts = new TableSchema { Title = tableName };
+                        var ts = new TableSchema
+                        {
+                            Title = tableName,
+                            ModuleName = moduleName,
+                            MethodName = item.Name
+                        };
                         DatabaseSchema.TableList.Add(ts);
 
                         ts.Rows = new CallRowSchema();

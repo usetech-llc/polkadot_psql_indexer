@@ -25,7 +25,7 @@ namespace WebApi.Controllers
 
         // GET extrinsic/{id}
         [HttpGet("{id?}")]
-        public ActionResult<IEnumerable<string>> Get()
+        public ActionResult<Response> Get()
         {
             var uriParams = UriParse.PolkadotParseUri(Request.QueryString.Value);
 
@@ -37,9 +37,11 @@ namespace WebApi.Controllers
                 AddressTo = UriParse.TryGetValue(uriParams, "filter", "address_to")
             };
 
-            var result = _dataAdapter.GetFilteredTransactionList(tf, 10, 0);
+            var data = _dataAdapter.GetFilteredTransactionList(tf, 10, 0);
+            var result = DTO.Response.Default();
+            result.Data = ResponseWrapper.TransactionList(data);
 
-            return new ActionResult<IEnumerable<string>>(result);
+            return result;
         }
     }
 }
