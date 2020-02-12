@@ -40,7 +40,7 @@ namespace WebApi.Tools
                     new ExtrinsicData
                     {
                         Id = $"{blockNumber}-{i.Value.Count()}",
-                        Type = "",
+                        Type = "extrinsic",
                         Attributes = new ExtrinsicDataAttribute
                         {
                             ModuleId = i.Key.ModuleName,
