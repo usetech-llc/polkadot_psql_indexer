@@ -39,7 +39,7 @@ namespace WebApi.Tools
                 result.Add(
                     new ExtrinsicData
                     {
-                        Id = $"{c}",
+                        Id = $"{blockNumber}-{i.Value.Count()}",
                         Type = "",
                         Attributes = new ExtrinsicDataAttribute
                         {
@@ -47,7 +47,8 @@ namespace WebApi.Tools
                             CallId = i.Key.MethodName,
                             BlockId = blockNumber,
                             Signed = "1",
-                            Unsigned = "0"
+                            Unsigned = "0",
+                            ExtrinsicHash = ""
                         }
                     }
                 );
