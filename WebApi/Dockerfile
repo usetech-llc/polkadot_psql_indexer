@@ -6,6 +6,7 @@ EXPOSE 443
 FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /src
 COPY ["WebApi/WebApi.csproj", "WebApi/"]
+COPY ["WebApi/md.txt", "/app/md.txt"]
 RUN dotnet restore "WebApi/WebApi.csproj"
 COPY . .
 WORKDIR "/src/WebApi"
