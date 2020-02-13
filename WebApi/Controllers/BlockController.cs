@@ -29,10 +29,10 @@ namespace WebApi.Controllers
         [HttpGet("{id?}")]
         public ActionResult<BlockResponse> Get(string id)
         {
-            if (UriParse.NotNullOrEmpty(id))
+            if (!UriParse.NotNullOrEmpty(id))
                 return null;
 
-            var data = (id.Substring(0, 2).Equals("0x")) ? 
+            var data = (id.Length > 10 && id.Substring(0, 2).Equals("0x")) ? 
                 _dataAdapter.GetBlockByHash(_metadataSchema.DatabaseSchema.TableList.ToArray(), id) : 
                 _dataAdapter.GetBlockByNumber(_metadataSchema.DatabaseSchema.TableList.ToArray(), id);
 
