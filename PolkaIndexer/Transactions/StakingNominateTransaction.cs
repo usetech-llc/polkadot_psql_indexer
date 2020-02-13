@@ -52,7 +52,14 @@ namespace PolkaIndexer
                 Value = new List<string> { targetsString }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { blocknumber, targetsRow });
+            var transactionSenderKey = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Sender",
+                Value = new List<string> { sk }
+            };
+
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { transactionSenderKey, blocknumber, targetsRow });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)

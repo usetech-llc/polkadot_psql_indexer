@@ -76,7 +76,7 @@ namespace PolkaIndexer
                 methodName = r1.Item2;
                 result = true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false; 
             }

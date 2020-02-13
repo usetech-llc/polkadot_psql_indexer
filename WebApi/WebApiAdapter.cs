@@ -21,14 +21,38 @@ namespace WebApi
             _md = md;
         }
 
-        public Block GetBlockByHash(string hash)
+        public Dictionary<TableSchema, IEnumerable<string>> GetBlockByHash(TableSchema[] tablesSql, string hash, string addId = "0")
         {
-            return _reader.GetBlockByHash(hash);
+            int num = 0;
+            int.TryParse(addId, out num);
+
+            var tables = _md.DatabaseSchema.TableList.Where(i => i.Rows != null && i.Rows.GetRowNumber("Block") != -1).ToArray();
+            var data = _reader.GetBlockByHash(tables.ToArray(), hash).ElementAt(num);
+
+            var dic = new Dictionary<TableSchema, IEnumerable<string>>();
+
+            dic.Add(tables.FirstOrDefault(i => i.Title.Equals(data.Key)), data.Value);
+
+            return dic;
         }
 
-        public Block GetBlockByNumber(string number)
+        public Dictionary<TableSchema, IEnumerable<string>> GetBlockByNumber(TableSchema[] tablesSql, string number)
         {
-            return _reader.GetBlockByNumber(number);
+            var filterSql = $" \"blocknumber\" @> ARRAY['{number}']::varchar[]";
+            var tables = _md.DatabaseSchema.TableList.Where(i => i.Rows != null && i.Rows.UseBlockNumber).ToArray();
+
+            var data = _reader.GetTransactionList(tables, filterSql);
+
+            var dic = new Dictionary<TableSchema, IEnumerable<string>>();
+
+            int num = 0;
+            foreach (var di in data)
+            {
+                dic.Add(tables.FirstOrDefault(i => i.Title.Equals(di.Key)), di.Value);
+                num++;
+            }
+
+            return dic;
         }
 
         public Dictionary<TableSchema, IEnumerable<string>> GetFilteredTransactionList(TransactionFilter filter, int limit, int offset)
@@ -51,16 +75,16 @@ namespace WebApi
 
             if (UriParse.NotNullOrEmpty(filter.Module))
             {
-                tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Title.Contains($"{filter.Module}call")));
+                tables = tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.ModuleName.Contains(filter.Module, StringComparison.InvariantCultureIgnoreCase))).ToList();
             }
 
             if (UriParse.NotNullOrEmpty(filter.Method))
             {
-                tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Title.Contains($"call{filter.Method}")));
+                tables = tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.MethodName.Contains(filter.Method, StringComparison.InvariantCultureIgnoreCase))).ToList();
             }
 
             var filterSql = string.Join(",", filterList);
-            var data = _reader.GetTransactionList(tables.Select(i => i.Title).ToArray(), filterSql);
+            var data = _reader.GetTransactionList(tables.ToArray(), filterSql);
 
             var dic = new Dictionary<TableSchema, IEnumerable<string>>();
 
@@ -74,9 +98,19 @@ namespace WebApi
             return dic;
         }
 
-        public Extrinsic GetTransactionByHash(string hash)
+        public Dictionary<TableSchema, IEnumerable<string>> GetTransactionByHash(TableSchema[] tablesSql, string hash, string addId = "0")
         {
-            return _reader.GetTransactionByHash(hash);
+            var filterSql = $" \"Block\" @> ARRAY['{hash}']::varchar[]";
+            var tables = _md.DatabaseSchema.TableList.Where(i => i.Rows != null && i.Rows.GetRowNumber("Block") != -1).ToArray();
+
+            int num = 0;
+            int.TryParse(addId, out num);
+
+            var data = _reader.GetTransactionList(tables, filterSql).ElementAt(num);
+            var dic = new Dictionary<TableSchema, IEnumerable<string>>();
+            dic.Add(tables.FirstOrDefault(i => i.Title.Equals(data.Key)), data.Value);
+
+            return dic;
         }
     }
 }

@@ -53,7 +53,14 @@ namespace PolkaIndexer
                 Value = new List<string> { pex.BlockNumber.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { proposalHashRow, valueRow, blocknumber });
+            var transactionSenderKey = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Sender",
+                Value = new List<string> { sk }
+            };
+
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { transactionSenderKey, proposalHashRow, valueRow, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)
@@ -70,7 +77,7 @@ namespace PolkaIndexer
             // 32 * 2
             var senderPublic = parse.Substring(0, 64);
             parse = parse.Substring(64);
-            var sk = senderPublic;
+            sk = senderPublic;
 
             parse = parse.Substring(68 * 2);
             Scale.NextByte(ref parse);

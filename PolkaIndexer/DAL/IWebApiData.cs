@@ -7,9 +7,9 @@ namespace PolkaIndexer.DAL
 {
     public interface IWebApiDataAdapter
     {
-        Block GetBlockByNumber(string number);
-        Block GetBlockByHash(string hash);
-        Extrinsic GetTransactionByHash(string hash);
+        Dictionary<TableSchema, IEnumerable<string>> GetBlockByNumber(TableSchema[] tablesSql, string number);
+        Dictionary<TableSchema, IEnumerable<string>> GetBlockByHash(TableSchema[] tablesSql, string hash, string addId = "0");
+        Dictionary<TableSchema, IEnumerable<string>> GetTransactionByHash(TableSchema[] tablesSql, string hash, string addId = "0");
         Dictionary<TableSchema, IEnumerable<string>> GetFilteredTransactionList(TransactionFilter filter, int limit, int offset);
     }
 }

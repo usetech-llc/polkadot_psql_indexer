@@ -537,33 +537,98 @@ namespace PolkaIndexer.DAL
 
         #region WebApi
 
-        public Block GetBlockByNumber(string number)
+        public Dictionary<string, IEnumerable<string>> GetBlockByNumber(TableSchema[] tablesSql, string number)
         {
             throw new NotImplementedException();
         }
 
-        public Block GetBlockByHash(string hash)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Extrinsic GetTransactionByHash(string hash)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Extrinsic> GetFilteredTransactionList(TransactionFilter addressFrom, int limit, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Dictionary<string, IEnumerable<string>> GetTransactionList(string[] tablesSql, string filterSql)
+        public Dictionary<string, IEnumerable<string>> GetBlockByHash(TableSchema[] tablesSql, string hash)
         {
             var extrinsicList = new Dictionary<string, IEnumerable<string>>();
 
             foreach (var t in tablesSql)
             {
-                var sql = $"SELECT * FROM {t}";
+                var sql = $"SELECT * FROM {t.Title}";
+
+                if (t.Rows.GetRowNumber("Block") != -1)
+                {
+                    sql += $" WHERE \"Block\" @> ARRAY['{hash}']::varchar[]";
+                }
+
+                var result = ExecuteReaderInsideConnection(sql);
+                var row = new List<string>();
+
+                foreach (var r in result)
+                {
+                    foreach (var i in r)
+                    {
+                        Type valueType = i.GetType();
+                        if (valueType.IsArray)
+                        {
+                            row.Add(((string[])i)[0].ToString());
+                        }
+                        else
+                        {
+                            row.Add(i.ToString());
+                        }
+                    }
+                }
+
+
+                if (row.Count > 0)
+                    extrinsicList.Add(t.Title, row);
+            }
+
+            return extrinsicList;
+        }
+
+        public Dictionary<string, IEnumerable<string>> GetTransactionByHash(TableSchema[] tablesSql, string hash)
+        {
+            var extrinsicList = new Dictionary<string, IEnumerable<string>>();
+
+            foreach (var t in tablesSql)
+            {
+                var sql = $"SELECT * FROM {t.Title}";
+
+                if (t.Rows.GetRowNumber("Block") != -1)
+                {
+                    sql += $" WHERE \"Block\" @> ARRAY['{hash}']::varchar[]";
+                }
+
+                var result = ExecuteReaderInsideConnection(sql);
+                var row = new List<string>();
+
+                foreach (var r in result)
+                {
+                    foreach (var i in r)
+                    {
+                        Type valueType = i.GetType();
+                        if (valueType.IsArray)
+                        {
+                            row.Add(((string[])i)[0].ToString());
+                        }
+                        else
+                        {
+                            row.Add(i.ToString());
+                        }
+                    }
+                }
+
+
+                if (row.Count > 0)
+                    extrinsicList.Add(t.Title, row);
+            }
+
+            return extrinsicList;
+        }
+
+        public Dictionary<string, IEnumerable<string>> GetTransactionList(TableSchema[] tablesSql, string filterSql)
+        {
+            var extrinsicList = new Dictionary<string, IEnumerable<string>>();
+
+            foreach (var t in tablesSql)
+            {
+                var sql = $"SELECT * FROM {t.Title}";
 
                 if (filterSql.Count() > 0)
                 {
@@ -591,7 +656,7 @@ namespace PolkaIndexer.DAL
 
 
                 if (row.Count > 0)
-                    extrinsicList.Add(t, row);
+                    extrinsicList.Add(t.Title, row);
             }
 
             return extrinsicList;

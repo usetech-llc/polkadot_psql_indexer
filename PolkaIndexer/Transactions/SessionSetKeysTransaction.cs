@@ -15,6 +15,7 @@ namespace PolkaIndexer
 
         private List<string> keys;
         private string proof;
+        private string sk;
 
         public SessionSetKeysTransaction(IDatabaseAdapdable databaseAdapdable, Metadata metadata)
         {
@@ -59,7 +60,14 @@ namespace PolkaIndexer
                 Value = new List<string> { proof }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { keysRow, proofRow, blocknumber });
+            var transactionSenderKey = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Sender",
+                Value = new List<string> { sk }
+            };
+
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { transactionSenderKey, keysRow, proofRow, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)
@@ -76,7 +84,7 @@ namespace PolkaIndexer
             // 32 * 2
             var senderPublic = parse.Substring(0, 64);
             parse = parse.Substring(64);
-            var sk = senderPublic;
+            sk = senderPublic;
 
             parse = parse.Substring(68 * 2);
             Scale.NextByte(ref parse);

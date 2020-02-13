@@ -5,6 +5,7 @@ using PolkaIndexer.DAL;
 using PolkaIndexer.WebApi;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using WebApi.DTO;
 using WebApi.Tools;
 
@@ -25,8 +26,41 @@ namespace WebApi.Controllers
 
         // GET extrinsic/{id}
         [HttpGet("{id?}")]
-        public ActionResult<Response> Get()
+        public ActionResult<ExtrinsicBase> Get(string id)
         {
+            if (UriParse.NotNullOrEmpty(id))
+            {
+                Dictionary<TableSchema, IEnumerable<string>> data2;
+
+                if (id.Substring(0, 2).Equals("0x"))
+                {
+                    var ids = id.Split('-');
+                    string addId = "";
+
+                    if (ids.Count() > 1)
+                    {
+                        id = ids.ElementAt(0);
+                        addId = ids.ElementAt(1);
+                    }
+
+                    data2 = _dataAdapter.GetBlockByHash(_metadataSchema.DatabaseSchema.TableList.ToArray(), id, addId);
+                    if (data2.Count == 0)
+                    {
+                        data2 = _dataAdapter.GetTransactionByHash(_metadataSchema.DatabaseSchema.TableList.ToArray(), id, addId);
+                    }
+                }
+                else
+                {
+                    data2 = _dataAdapter.GetBlockByNumber(_metadataSchema.DatabaseSchema.TableList.ToArray(), id);
+                }
+
+                var result2 = DTO.ExtrinsicResponseSingle.Default();
+                result2.Data = ResponseWrapper.Transaction(data2);
+
+                return result2;
+            }
+
+            var result = DTO.ExtrinsicResponse.Default();
             var uriParams = UriParse.PolkadotParseUri(Request.QueryString.Value);
 
             var tf = new TransactionFilter
@@ -37,9 +71,17 @@ namespace WebApi.Controllers
                 AddressTo = UriParse.TryGetValue(uriParams, "filter", "address_to")
             };
 
-            var data = _dataAdapter.GetFilteredTransactionList(tf, 10, 0);
-            var result = DTO.Response.Default();
-            result.Data = ResponseWrapper.TransactionList(data);
+            var limit = Convert.ToInt32(UriParse.TryGetValue(uriParams, "page", "size"));
+            var pnum = Convert.ToInt32(UriParse.TryGetValue(uriParams, "page", "number"));
+            var data = _dataAdapter.GetFilteredTransactionList(tf, 0, 0);
+            var list = ResponseWrapper.TransactionList(data);
+
+            if (pnum > 1)
+            {
+                list = list.Skip((pnum - 1) * limit);
+            }
+
+            result.Data = list.Take(limit);
 
             return result;
         }

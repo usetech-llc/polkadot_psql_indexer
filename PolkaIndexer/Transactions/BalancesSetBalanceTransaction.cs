@@ -13,6 +13,7 @@ namespace PolkaIndexer
         private Metadata _metadata;
         private ExtrinsicInfo pex;
         private string rk;
+        private string sk;
         private string newFree;
         private string newReserved;
 
@@ -65,6 +66,13 @@ namespace PolkaIndexer
                 Value = new List<string> { newReserved }
             };
 
+            var transactionSenderKey = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Sender",
+                Value = new List<string> { sk }
+            };
+
             var blocknumber = new TableRow
             {
                 RowIndex = 0,
@@ -72,7 +80,7 @@ namespace PolkaIndexer
                 Value = new List<string> { newReserved }
             };
 
-            _dbAdapter.InsertIntoCall(bsb, new List<TableRow> { who, nFree, nReserved, blocknumber });
+            _dbAdapter.InsertIntoCall(bsb, new List<TableRow> { who, nFree, nReserved, blocknumber, transactionSenderKey });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)
@@ -89,7 +97,7 @@ namespace PolkaIndexer
             // 32 * 2
             var senderPublic = parse.Substring(0, 64);
             parse = parse.Substring(64);
-            var sk = senderPublic;
+            sk = senderPublic;
 
             parse = parse.Substring(68 * 2);
             Scale.NextByte(ref parse);
