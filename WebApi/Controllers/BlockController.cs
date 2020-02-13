@@ -29,7 +29,7 @@ namespace WebApi.Controllers
         [HttpGet("{id?}")]
         public ActionResult<BlockResponse> Get(string id)
         {
-            if (id == null)
+            if (UriParse.NotNullOrEmpty(id))
                 return null;
 
             var data = (id.Substring(0, 2).Equals("0x")) ? 
