@@ -15,6 +15,7 @@ namespace PolkaIndexer
         private ExtrinsicInfo _pex;
 
         private string newValue;
+        private string sk;
 
         public StakingSetValidatorCountTransaction(IDatabaseAdapdable databaseAdapdable, Metadata metadata)
         {
@@ -44,7 +45,14 @@ namespace PolkaIndexer
                 Value = new List<string> { newValue }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { newValueRow, blocknumber });
+            var transactionSenderKey = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Sender",
+                Value = new List<string> { sk }
+            };
+
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { transactionSenderKey, newValueRow, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)
@@ -64,7 +72,7 @@ namespace PolkaIndexer
             // 32 * 2
             var senderPublic = parse.Substring(0, 64);
             parse = parse.Substring(64);
-            var sk = senderPublic;
+            sk = senderPublic;
 
             parse = parse.Substring(67 * 2);
             //Scale.NextByte(ref parse);

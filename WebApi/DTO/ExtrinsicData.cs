@@ -5,7 +5,20 @@ using System.Threading.Tasks;
 
 namespace WebApi.DTO
 {
-    public class ExtrinsicDataAttribute
+    public class IncludeExtrinsicAttributeEx : IncludeExtrinsicAttribute
+    {
+        public IEnumerable<IncludeExtrinsicAttributeParams> Params { get; set; }
+    }
+
+    public class IncludeExtrinsicAttributeParams
+    {
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public string Value { get; set; }
+        public string ValueRaw { get; set; }
+    }
+
+    public class IncludeExtrinsicAttribute
     {
         public string BlockId { get; set; }
         public string ExtrinsicIdx { get; set; }
@@ -36,6 +49,6 @@ namespace WebApi.DTO
     {
         public string Type { get; set; }
         public string Id { get; set; }
-        public ExtrinsicDataAttribute Attributes { get; set; }
+        public IncludeExtrinsicAttribute Attributes { get; set; }
     }
 }

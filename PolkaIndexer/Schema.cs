@@ -59,6 +59,28 @@ namespace PolkaIndexer
             return -1;
         }
 
+        public int Count()
+        {
+            int add = this.UseBlockNumber ? 1 : 0;
+
+            if (this is MapRowSchema mrs)
+            {   
+                return 3 + add;
+            }
+
+            if (this is DoubleMapRowSchema dmrs)
+            {
+                return 4 + add;
+            }
+
+            if (this is CallRowSchema crs)
+            {
+                return crs.Args.Count() + add;
+            }
+
+            return 0;
+        }
+
         public string BlockNumber { get; set; }
         public bool UseBlockNumber { get; set; }
         public bool AutoIncrement { get; set; }
@@ -92,6 +114,11 @@ namespace PolkaIndexer
             Args.Add(new MapRowSchema { Key = "Timestamp", Value = "String", UseBlockNumber = false });
             Args.Add(new MapRowSchema { Key = "Nonce", Value = "String", UseBlockNumber = false });
             Args.Add(new MapRowSchema { Key = "Signature", Value = "String", UseBlockNumber = false });
+        }
+
+        public static int DefaultColumnsCount()
+        {
+            return 8;
         }
     }
 

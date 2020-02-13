@@ -54,6 +54,13 @@ namespace PolkaIndexer
 
             _dbAdapter.InsertIntoStorage(freebal, part1);
 
+            var transactionSenderKey = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Sender",
+                Value = new List<string> { sk }
+            };
+
             var transfer = new TableName
             {
                 MethodName = "bond_extra",
@@ -74,7 +81,7 @@ namespace PolkaIndexer
                 Value = new List<string> { _pex.BlockNumber.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { maxAdditional, blocknumber });
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { transactionSenderKey, maxAdditional, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)

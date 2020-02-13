@@ -6,10 +6,10 @@ namespace PolkaIndexer.DAL
 {
     public interface IDatabaseDataReader : IDatabaseAdapdable
     {
-        Block GetBlockByHash(string hash);
-        Block GetBlockByNumber(string number);
-        Extrinsic GetTransactionByHash(string hash);
-        Dictionary<string, IEnumerable<string>> GetTransactionList(string[] tablesSql, string filterSql);
+        Dictionary<string, IEnumerable<string>> GetBlockByHash(TableSchema[] tablesSql,string hash);
+        Dictionary<string, IEnumerable<string>> GetBlockByNumber(TableSchema[] tablesSql, string number);
+        Dictionary<string, IEnumerable<string>> GetTransactionByHash(TableSchema[] tablesSql, string hash);
+        Dictionary<string, IEnumerable<string>> GetTransactionList(TableSchema[] tablesSql, string filterSql);
     }
 
     public interface IDatabaseAdapdable

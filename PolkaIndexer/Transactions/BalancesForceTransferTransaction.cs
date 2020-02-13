@@ -41,7 +41,6 @@ namespace PolkaIndexer
                 BlockNumber = pex.BlockNumber
             };
 
-            //var tst1 = 
             ulong curValue = 0;
             var sval = _dbAdapter.GetLastStorageValue(freebal, curValueRow);
             if (!sval.Equals(""))
@@ -74,7 +73,7 @@ namespace PolkaIndexer
             {
                 RowIndex = 0,
                 RowName = "source",
-                Value = new List<string> { rk }
+                Value = new List<string> { sk }
             };
 
             var nFree = new TableRow
@@ -115,7 +114,7 @@ namespace PolkaIndexer
             // 32 * 2
             var senderPublic = parse.Substring(0, 64);
             parse = parse.Substring(64);
-            var sk = senderPublic;
+            sk = senderPublic;
 
             parse = parse.Substring(68 * 2);
             Scale.NextByte(ref parse);

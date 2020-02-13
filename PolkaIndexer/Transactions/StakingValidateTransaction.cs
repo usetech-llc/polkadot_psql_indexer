@@ -46,7 +46,14 @@ namespace PolkaIndexer
                 Value = new List<string> { _pex.BlockNumber.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { blocknumber, prefs });
+            var transactionSenderKey = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Sender",
+                Value = new List<string> { sk }
+            };
+
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { transactionSenderKey, blocknumber, prefs });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)

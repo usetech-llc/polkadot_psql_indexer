@@ -7,6 +7,8 @@ using Newtonsoft.Json.Serialization;
 using Polkadot.Api;
 using PolkaIndexer;
 using PolkaIndexer.DAL;
+using System.IO;
+using WebApi.Controllers;
 
 namespace WebApi
 {
@@ -48,9 +50,12 @@ namespace WebApi
             //    app.Disconnect();
             //}
 
+            var rt = File.ReadAllText("runtime.txt");
+
             var dataReader = new Postgres(Postgres.GetConnectionString());
             services.AddSingleton(sch);
             services.AddSingleton(dataReader);
+            services.AddSingleton<IRuntime>(new Runtime(rt));
             services.AddSingleton<IWebApiDataAdapter>(new IndexedWebApi(dataReader, sch));
             services.AddMvc()
                 .AddJsonOptions(x =>
@@ -78,7 +83,6 @@ namespace WebApi
             app.UseCors(MyAllowSpecificOrigins);
 
             //app.UseHttpsRedirection();
-            //app.UseO
             app.UseMvc();
         }
     }
