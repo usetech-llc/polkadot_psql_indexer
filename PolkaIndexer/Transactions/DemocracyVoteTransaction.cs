@@ -85,7 +85,7 @@ namespace PolkaIndexer
             bool result = false;
             string moduleName = string.Empty, methodName = string.Empty;
 
-            Scale.NextByte(ref parse);
+            //Scale.NextByte(ref parse);
             var moduleInd = Scale.NextByte(ref parse);
             var methodInd = Scale.NextByte(ref parse);
 

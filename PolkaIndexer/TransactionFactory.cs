@@ -26,7 +26,6 @@ namespace PolkaIndexer
             _specificTransactions = new List<ISpecificTransaction>
             {
                 // default scalar or vector transaction 
-                new NotSpecificTransaction(_dbAdapter, _transactionSchema),
                 new BalancesTransferTransaction(_dbAdapter, _transactionSchema),
                 new BalancesSetBalanceTransaction(_dbAdapter, _transactionSchema),
                 new BalancesForceTransferTransaction(_dbAdapter, _transactionSchema),
@@ -47,7 +46,8 @@ namespace PolkaIndexer
                 new DemocracyProposeTransaction(_dbAdapter, _transactionSchema),
                 new DemocracySecondTransaction(_dbAdapter, _transactionSchema),
                 new DemocracyVoteTransaction(_dbAdapter, _transactionSchema),
-                new DemocracyCancelReferendumTransaction(_dbAdapter, _transactionSchema)
+                new DemocracyCancelReferendumTransaction(_dbAdapter, _transactionSchema),
+                new NotSpecificTransaction(_dbAdapter, _transactionSchema)
             };
         }
 
