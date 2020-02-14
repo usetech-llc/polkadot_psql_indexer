@@ -185,8 +185,12 @@ namespace WebApi.Tools
                     var rowIndex = i.Key.Rows.GetRowNumber("Block");
                     if (rowIndex != -1)
                     {
+                        block = rlist.ElementAt(rowIndex);
 
-                        block = rlist.ElementAt(rowIndex).Substring(2);
+                        if (block.Length > 10)
+                        {
+                            block = block.Substring(2);
+                        }
                     }
 
                     result.Add(
