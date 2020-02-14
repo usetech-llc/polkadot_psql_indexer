@@ -7,6 +7,7 @@ using Newtonsoft.Json.Serialization;
 using Polkadot.Api;
 using PolkaIndexer;
 using PolkaIndexer.DAL;
+using System.Configuration;
 using System.IO;
 using WebApi.Controllers;
 
@@ -32,7 +33,7 @@ namespace WebApi
                 options.AddPolicy(MyAllowSpecificOrigins,
                 builder =>
                 {
-                    builder.WithOrigins("http://localhost:4200")
+                    builder.WithOrigins(ConfigurationManager.AppSettings["ClientUIHost"])
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials();
@@ -41,6 +42,8 @@ namespace WebApi
 
 
             MetadataSchema sch = MetadataSchema.GetDbg();
+
+            // ConfigurationManager.AppSettings["Substrate"];
 
             //MetadataSchema sch = new MetadataSchema();
             //using (IApplication app = PolkaApi.GetAppication())
@@ -52,7 +55,7 @@ namespace WebApi
 
             var rt = File.ReadAllText("runtime.txt");
 
-            var dataReader = new Postgres(Postgres.GetConnectionString());
+            var dataReader = new Postgres(ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString);
             services.AddSingleton(sch);
             services.AddSingleton(dataReader);
             services.AddSingleton<IRuntime>(new Runtime(rt));

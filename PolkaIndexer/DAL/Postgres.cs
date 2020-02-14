@@ -131,12 +131,6 @@ namespace PolkaIndexer.DAL
             { SubstrateType.ParaId , DataType.ParaId },
         };
 
-        public static string GetConnectionString()
-        {
-            //return ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString;
-            return "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=";
-        }
-
         public Postgres(string connectionString)
         {
            _connectionString = connectionString;
