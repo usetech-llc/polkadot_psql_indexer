@@ -559,7 +559,8 @@ namespace PolkaIndexer.DAL
                         Type valueType = i.GetType();
                         if (valueType.IsArray)
                         {
-                            row.Add(((string[])i)[0].ToString());
+                            var arr = (string[])i;
+                            row.Add(arr.Length > 0 ? arr[0] : "");
                         }
                         else
                         {
@@ -599,7 +600,8 @@ namespace PolkaIndexer.DAL
                         Type valueType = i.GetType();
                         if (valueType.IsArray)
                         {
-                            row.Add(((string[])i)[0].ToString());
+                            var arr = (string[])i;
+                            row.Add(arr.Length > 0 ? arr[0] : "");
                         }
                         else
                         {
@@ -639,7 +641,8 @@ namespace PolkaIndexer.DAL
                         Type valueType = i.GetType();
                         if (valueType.IsArray)
                         {
-                            row.Add(((string[])i)[0].ToString());
+                            var arr = (string[])i;
+                            row.Add(arr.Length > 0 ? arr[0] : "");
                         }
                         else
                         {
