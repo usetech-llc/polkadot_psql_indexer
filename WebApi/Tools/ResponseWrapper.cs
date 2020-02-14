@@ -146,7 +146,11 @@ namespace WebApi.Tools
                 }
             }
 
-            return result.OrderByDescending(i => Convert.ToInt32(i.Attributes.BlockId));
+            return result.OrderByDescending(i => {
+                int num = 0;
+                int.TryParse(i.Attributes.BlockId, out num);
+                return num;
+            });
         }
 
         public static BlockData BlockData(Dictionary<TableSchema, IEnumerable<string>> data)
