@@ -5,6 +5,7 @@ using Polkadot.Utils;
 using PolkaIndexer.DAL;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace PolkaIndexer
 {
@@ -41,15 +42,15 @@ namespace PolkaIndexer
                 BlockNumber = _pex.BlockNumber
             };
 
-            ulong curValue = 0;
+            BigInteger curValue = 0;
             var sval = _dbAdapter.GetLastStorageValue(freebal, curValueRow);
             if (!sval.Equals(""))
             {
-                curValue = Convert.ToUInt64(sval);
+                curValue = BigInteger.Parse(sval);
             }
 
             // var curValue = Convert.ToUInt64(_dbAdapter.GetLastStorageValue(freebal, curValueRow));
-            var intAmount = Convert.ToUInt64(amount);
+            var intAmount = BigInteger.Parse(amount);
 
             var part1 = new TableRow
             {
