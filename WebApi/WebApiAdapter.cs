@@ -75,12 +75,12 @@ namespace WebApi
 
             if (UriParse.NotNullOrEmpty(filter.Module))
             {
-                tables = tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.ModuleName.Contains(filter.Module, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                tables = tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.ModuleName != null && i.ModuleName.Contains(filter.Module, StringComparison.InvariantCultureIgnoreCase))).ToList();
             }
 
             if (UriParse.NotNullOrEmpty(filter.Method))
             {
-                tables = tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.MethodName.Contains(filter.Method, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                tables = tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.MethodName != null && i.MethodName.Contains(filter.Method, StringComparison.InvariantCultureIgnoreCase))).ToList();
             }
 
             var filterSql = string.Join(",", filterList);
