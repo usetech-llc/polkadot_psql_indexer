@@ -50,17 +50,6 @@ namespace WebApi.Tools
             return uriParams;
         }
 
-        public static bool NotNullOrEmpty(string str)
-        {
-            if (str == null)
-                return false;
-
-            if (str.Equals(string.Empty))
-                return false;
-
-            return true;
-        }
-
         public static string TryGetValue(Dictionary<string, Dictionary<string, string>> parsedPolkaUri, string path1, string path2)
         {
             Dictionary<string, string> obj;

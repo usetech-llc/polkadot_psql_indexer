@@ -171,7 +171,7 @@ namespace PolkaIndexer
 
             rk = parse.Substring(0, 64);
             parse = parse.Substring(64);
-            Scale.NextByte(ref parse);
+            //Scale.NextByte(ref parse);
             amount = Scale.DecodeCompactInteger(ref parse).Value.ToString();
 
             // try parse transaction if catch exception that transaction is not supported

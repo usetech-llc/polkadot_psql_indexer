@@ -23,10 +23,13 @@ namespace WebApi
 
         public Dictionary<TableSchema, IEnumerable<string>> GetBlockByHash(TableSchema[] tablesSql, string hash, string addId = "0")
         {
+            var tables = tablesSql.Where(i => i.Rows != null && i.Rows.UseBlockNumber).ToArray();
+            tables = tables.Where(i => i.Title.Contains("Call")).ToArray();
+            tables = tables.Where(i => i.Rows != null && i.Rows.GetRowNumber("Block") != -1).ToArray();
+
             int num = 0;
             int.TryParse(addId, out num);
 
-            var tables = _md.DatabaseSchema.TableList.Where(i => i.Rows != null && i.Rows.GetRowNumber("Block") != -1).ToArray();
             var data = _reader.GetBlockByHash(tables.ToArray(), hash).ElementAt(num);
 
             var dic = new Dictionary<TableSchema, IEnumerable<string>>();
@@ -39,7 +42,8 @@ namespace WebApi
         public Dictionary<TableSchema, IEnumerable<string>> GetBlockByNumber(TableSchema[] tablesSql, string number)
         {
             var filterSql = $" \"blocknumber\" @> ARRAY['{number}']::varchar[]";
-            var tables = _md.DatabaseSchema.TableList.Where(i => i.Rows != null && i.Rows.UseBlockNumber).ToArray();
+            var tables = tablesSql.Where(i => i.Rows != null && i.Rows.UseBlockNumber).ToArray();
+            tables = tables.Where(i => i.Title.Contains("Call")).ToArray();
 
             var data = _reader.GetTransactionList(tables, filterSql);
 
@@ -58,27 +62,27 @@ namespace WebApi
         public Dictionary<TableSchema, IEnumerable<string>> GetFilteredTransactionList(TransactionFilter filter, int limit, int offset)
         {
             var filterList = new List<string>();
-            var tables = _md.DatabaseSchema.TableList.ToList();
+            var tables = _md.DatabaseSchema.TableList.Where(i => i.Title.Contains("Call")).ToList();
 
             // Build sql query 
-            if (UriParse.NotNullOrEmpty(filter.AddressTo))
+            if (!string.IsNullOrEmpty(filter.AddressTo))
             {
                 tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Rows.GetRowNumber("dest") > -1));
                 filterList.Add($" dest = {filter.AddressTo}");
             }
 
-            if (UriParse.NotNullOrEmpty(filter.AddressFrom))
+            if (!string.IsNullOrEmpty(filter.AddressFrom))
             {
                 tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Rows.GetRowNumber("Sender") > -1));
                 filterList.Add($" Sender = {filter.AddressFrom}");
             }
 
-            if (UriParse.NotNullOrEmpty(filter.Module))
+            if (!string.IsNullOrEmpty(filter.Module))
             {
                 tables = tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.ModuleName != null && i.ModuleName.Contains(filter.Module, StringComparison.InvariantCultureIgnoreCase))).ToList();
             }
 
-            if (UriParse.NotNullOrEmpty(filter.Method))
+            if (!string.IsNullOrEmpty(filter.Method))
             {
                 tables = tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.MethodName != null && i.MethodName.Contains(filter.Method, StringComparison.InvariantCultureIgnoreCase))).ToList();
             }

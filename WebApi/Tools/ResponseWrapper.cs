@@ -16,7 +16,7 @@ namespace WebApi.Tools
 
     public static class ResponseWrapper
     {
-        public static ExtrinsicData Transaction(Dictionary<TableSchema, IEnumerable<string>> data)
+        public static ExtrinsicData Transaction(Dictionary<TableSchema, IEnumerable<string>> data, string addId = null)
         {
             var result = new List<ExtrinsicData>();
 
@@ -31,7 +31,13 @@ namespace WebApi.Tools
 
                     var rowIndex = i.Key.Rows.Count() - 2;
                     string transactionIndex = rlist.ElementAt(rowIndex);
-                    transactionIndex = transactionIndex.Substring(1, transactionIndex.Length - 2);
+
+                    if (!(!string.IsNullOrWhiteSpace(addId) && transactionIndex.Equals(addId)))
+                    {
+                        c++;
+                        index += size;
+                        continue;
+                    }
 
                     string blockNumber;
                     if (i.Key.Rows.UseBlockNumber == true)
@@ -116,6 +122,7 @@ namespace WebApi.Tools
                                 Signed = "1",
                                 Unsigned = "0",
                                 ExtrinsicHash = block,
+                                ExtrinsicIdx = transactionIndex,
                                 Success = "1",
                                 CodecError = "false",
                                 SignedbyAddress = "1",
@@ -152,7 +159,6 @@ namespace WebApi.Tools
 
                     var rowIndex = i.Key.Rows.Count() - 2;
                     string transactionIndex = rlist.ElementAt(rowIndex);
-                    transactionIndex = transactionIndex.Substring(1, transactionIndex.Length - 2);
 
                     string blockNumber;
                     if (i.Key.Rows.UseBlockNumber == true)
@@ -166,9 +172,10 @@ namespace WebApi.Tools
 
                     var block = "0";
                     rowIndex = i.Key.Rows.GetRowNumber("Block");
-                    if (rowIndex != -1)
+                    var el = rowIndex != -1 ? rlist.ElementAt(rowIndex) : string.Empty;
+                    if (!string.IsNullOrEmpty(el))
                     {
-                        block = rlist.ElementAt(rowIndex);
+                        block = el;
                         if (block.Length > 10)
                         {
                             block = $"{block.Substring(2)}-{transactionIndex}";
@@ -211,6 +218,7 @@ namespace WebApi.Tools
                                 Unsigned = "0",
                                 ExtrinsicHash = block,
                                 Success = "1",
+                                ExtrinsicIdx = transactionIndex,
                                 CodecError = "false",
                                 SignedbyAddress = "1",
                                 SignedbyIndex = "0",
@@ -258,7 +266,6 @@ namespace WebApi.Tools
 
                     var rowIndex = i.Key.Rows.Count() - 2;
                     string transactionIndex = rlist.ElementAt(rowIndex);
-                    transactionIndex = transactionIndex.Substring(1, transactionIndex.Length - 2);
 
                     string blockNumber;
                     if (i.Key.Rows.UseBlockNumber == true)
@@ -272,14 +279,9 @@ namespace WebApi.Tools
 
                     var block = "0";
                     rowIndex = i.Key.Rows.GetRowNumber("Block");
-                    if (rowIndex != -1)
+                    if (rowIndex != -1 && string.IsNullOrWhiteSpace(transactionIndex))
                     {
-                        block = $"{rlist.ElementAt(rowIndex)}-{transactionIndex}";
-
-                        if (block.Length > 10)
-                        {
-                            block = $"{blockNumber}-{transactionIndex}";
-                        }
+                        block = rlist.ElementAt(rowIndex);
                     }
                     else
                     {
@@ -313,6 +315,7 @@ namespace WebApi.Tools
                                 Signed = "1",
                                 Unsigned = "0",
                                 ExtrinsicHash = block,
+                                ExtrinsicIdx = transactionIndex,
                                 Success = "1",
                                 CodecError = "false",
                                 SignedbyAddress = "1",
@@ -348,7 +351,6 @@ namespace WebApi.Tools
 
                     var rowIndex = i.Key.Rows.Count() - 2;
                     string transactionIndex = rlist.ElementAt(rowIndex);
-                    transactionIndex = transactionIndex.Substring(1, transactionIndex.Length - 2);
 
                     string blockNumber = string.Empty;
                     if (i.Key.Rows.UseBlockNumber == true)
@@ -390,6 +392,7 @@ namespace WebApi.Tools
                                 Signed = "1",
                                 Unsigned = "0",
                                 ExtrinsicHash = block,
+                                ExtrinsicIdx = transactionIndex,
                                 Success = "1",
                                 CodecError = "false",
                                 SignedbyAddress = "1",

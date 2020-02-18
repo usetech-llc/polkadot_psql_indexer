@@ -28,31 +28,31 @@ namespace WebApi.Controllers
         [HttpGet("{id?}")]
         public ActionResult<ExtrinsicBase> Get(string id)
         {
-            if (UriParse.NotNullOrEmpty(id))
+            var targetTables = _metadataSchema.DatabaseSchema.TableList.Where(i => i.Title.Contains("Call")).ToArray();
+
+            if (!string.IsNullOrWhiteSpace(id))
             {
+                string addId = "";
                 Dictionary<TableSchema, IEnumerable<string>> data2;
 
-                if (id.Length > 10)
+                if (id.Length > 30)
                 {
                     var ids = id.Split('-');
-                    string addId = "";
-
                     if (ids.Count() > 1)
                     {
                         id = ids.ElementAt(0);
                         addId = ids.ElementAt(1);
                     }
 
-                    data2 = _dataAdapter.GetBlockByHash(_metadataSchema.DatabaseSchema.TableList.ToArray(), id, addId);
+                    data2 = _dataAdapter.GetBlockByHash(targetTables, id, addId);
                     if (data2.Count == 0)
                     {
-                        data2 = _dataAdapter.GetTransactionByHash(_metadataSchema.DatabaseSchema.TableList.ToArray(), id, addId);
+                        data2 = _dataAdapter.GetTransactionByHash(targetTables, id, addId);
                     }
                 }
                 else
                 {
                     var ids = id.Split('-');
-                    string addId = "";
 
                     if (ids.Count() > 1)
                     {
@@ -60,14 +60,14 @@ namespace WebApi.Controllers
                         addId = ids.ElementAt(1);
                     }
 
-                    data2 = _dataAdapter.GetBlockByNumber(_metadataSchema.DatabaseSchema.TableList.ToArray(), id);
-                    var item = data2.ElementAt(int.Parse(addId));
-                    data2 = new Dictionary<TableSchema, IEnumerable<string>>();
-                    data2.Add(item.Key, item.Value);
+                    var tables = 
+
+                    data2 = _dataAdapter.GetBlockByNumber(targetTables, id);
+                   
                 }
 
                 var result2 = DTO.ExtrinsicResponseSingle.Default();
-                result2.Data = ResponseWrapper.Transaction(data2);
+                result2.Data = ResponseWrapper.Transaction(data2, addId);
 
                 return result2;
             }

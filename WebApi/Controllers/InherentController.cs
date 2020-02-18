@@ -28,19 +28,16 @@ namespace WebApi.Controllers
         [HttpGet("{id?}")]
         public ActionResult<ExtrinsicResponse> Get(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+                return null;
+
             var result = DTO.ExtrinsicResponse.Default();
+            var data2 = _dataAdapter.GetTransactionByHash(_metadataSchema.DatabaseSchema.TableList.ToArray(), id);
+            var list2 = ResponseWrapper.TransactionList(data2);
 
-            if (UriParse.NotNullOrEmpty(id))
-            {
-                var data2 = _dataAdapter.GetTransactionByHash(_metadataSchema.DatabaseSchema.TableList.ToArray(), id);
-                var list2 = ResponseWrapper.TransactionList(data2);
+            result.Data = list2;
 
-                result.Data = list2;
-
-                return result;
-            }
-
-            return null;
+            return result;
         }
     }
 }
