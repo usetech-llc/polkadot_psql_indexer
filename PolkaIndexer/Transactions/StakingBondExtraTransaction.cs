@@ -4,6 +4,7 @@ using Polkadot.Source.Utils;
 using PolkaIndexer.DAL;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace PolkaIndexer
 {
@@ -14,7 +15,7 @@ namespace PolkaIndexer
         private ExtrinsicInfo _pex;
 
         private string sk;
-        private string amount;
+        private BigInteger amount;
 
         public StakingBondExtraTransaction(IDatabaseAdapdable databaseAdapdable, Metadata metadata)
         {
@@ -71,7 +72,7 @@ namespace PolkaIndexer
             {
                 RowIndex = 1,
                 RowName = "max_additional",
-                Value = new List<string> { amount }
+                Value = new List<string> { amount.ToString() }
             };
 
             var blocknumber = new TableRow
@@ -81,7 +82,28 @@ namespace PolkaIndexer
                 Value = new List<string> { _pex.BlockNumber.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { transactionSenderKey, maxAdditional, blocknumber });
+            var nonce = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Nonce",
+                Value = new List<string> { _pex.Nonce.ToString() }
+            };
+
+            var signatureKey = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Signature",
+                Value = new List<string> { _pex.Signature }
+            };
+
+            var status = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Status",
+                Value = new List<string> { _pex.Status.ToString() }
+            };
+
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { signatureKey, status, nonce, transactionSenderKey, maxAdditional, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)
@@ -89,28 +111,36 @@ namespace PolkaIndexer
             var parse = extrinsic;
 
             parse = parse.Substring(2);
-            Scale.DecodeCompactInteger(ref parse);
+            var t1 = Scale.DecodeCompactInteger(ref parse);
 
-            // nonce + delimiter
-            var nonce = Scale.NextByte(ref parse);
+            // delimiter
+            Scale.NextByte(ref parse);
             Scale.NextByte(ref parse);
 
             // 32 * 2
             var senderPublic = parse.Substring(0, 64);
             parse = parse.Substring(64);
             sk = senderPublic;
+            var era = Scale.NextByte(ref parse);
 
-            parse = parse.Substring(68 * 2);
+            var signature = parse.Substring(0, 128);
+            parse = parse.Substring(128);
+
+            var err = Scale.DecodeCompactInteger(ref parse).Value;
+
+            var nonce = Scale.DecodeCompactInteger(ref parse).Value;
             Scale.NextByte(ref parse);
 
             bool result = false;
             string moduleName = string.Empty, methodName = string.Empty;
 
-            //Scale.NextByte(ref parse);
             var moduleInd = Scale.NextByte(ref parse);
             var methodInd = Scale.NextByte(ref parse);
-            amount = Scale.DecodeCompactInteger(ref parse).Value.ToString();
+            Scale.NextByte(ref parse);
+
             FunctionCallArgV8[] paramsInfo = null;
+
+            amount = Scale.DecodeCompactInteger(ref parse).Value;
 
             // try parse transaction if catch exception that transaction is not supported
             try
@@ -123,7 +153,7 @@ namespace PolkaIndexer
                     methodName.Equals("bond_extra", StringComparison.InvariantCultureIgnoreCase))
                     result = true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
@@ -139,6 +169,8 @@ namespace PolkaIndexer
                 MethodName = methodName,
                 Nonce = nonce,
                 ExtrinsicEra = 0,
+                Status = err,
+                Signature = signature,
                 Params = parse,
                 Unknown = result,
                 ParamsInfo = paramsInfo

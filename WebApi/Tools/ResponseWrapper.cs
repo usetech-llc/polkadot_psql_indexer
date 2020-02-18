@@ -44,6 +44,10 @@ namespace WebApi.Tools
                     {
                         block = rlist.ElementAt(rowIndex);
                     }
+                    else
+                    {
+                        block = $"{blockNumber}-{c}";
+                    }
 
                     var prms = new List<IncludeExtrinsicAttributeParams>();
                     var schm = (CallRowSchema)i.Key.Rows;
@@ -57,6 +61,24 @@ namespace WebApi.Tools
                             Value = rlist.ElementAt(prI),
                             ValueRaw = rlist.ElementAt(prI)
                         });
+                    }
+
+                    string nonce = string.Empty;
+                    rowIndex = i.Key.Rows.GetRowNumber("Nonce");
+                    if (rowIndex != -1)
+                    {
+                        nonce = rlist.ElementAt(rowIndex);
+                    }
+                    else
+                    {
+                        block = $"{blockNumber}-{c}";
+                    }
+
+                    string sig = string.Empty;
+                    rowIndex = i.Key.Rows.GetRowNumber("Signature");
+                    if (rowIndex != -1)
+                    {
+                        sig = rlist.ElementAt(rowIndex);
                     }
 
                     result.Add(
@@ -76,6 +98,9 @@ namespace WebApi.Tools
                                 CodecError = "false",
                                 SignedbyAddress = "1",
                                 SignedbyIndex = "0",
+                                Nonce = nonce,
+                                Signature = sig,
+                                Documentation = string.Join(' ', i.Key.Rows.Documentation),
                                 Params = prms
                             }
                         }
@@ -120,6 +145,28 @@ namespace WebApi.Tools
                             block = block.Substring(2);
                         }
                     }
+                    else
+                    {
+                        block = $"{blockNumber}-{c}";
+                    }
+
+                    string nonce = string.Empty;
+                    rowIndex = i.Key.Rows.GetRowNumber("Nonce");
+                    if (rowIndex != -1)
+                    {
+                        nonce = rlist.ElementAt(rowIndex);
+                    }
+
+                    string sig = string.Empty;
+                    rowIndex = i.Key.Rows.GetRowNumber("Signature");
+                    if (rowIndex != -1)
+                    {
+                        sig = rlist.ElementAt(rowIndex);
+                    }
+
+                    var doc = string.Empty;
+                    if (i.Key.Rows.Documentation != null)
+                        doc = string.Join(' ', i.Key.Rows.Documentation);
 
                     result.Add(
                         new ExtrinsicData
@@ -137,7 +184,10 @@ namespace WebApi.Tools
                                 Success = "1",
                                 CodecError = "false",
                                 SignedbyAddress = "1",
-                                SignedbyIndex = "0"
+                                SignedbyIndex = "0",
+                                Nonce = nonce,
+                                Signature = sig,
+                                Documentation = doc
                             }
                         }
                     );
@@ -196,6 +246,24 @@ namespace WebApi.Tools
                             block = block.Substring(2);
                         }
                     }
+                    else
+                    {
+                        block = $"{blockNumber}-{c}";
+                    }
+
+                    string nonce = string.Empty;
+                    rowIndex = i.Key.Rows.GetRowNumber("Nonce");
+                    if (rowIndex != -1)
+                    {
+                        nonce = rlist.ElementAt(rowIndex);
+                    }
+
+                    string sig = string.Empty;
+                    rowIndex = i.Key.Rows.GetRowNumber("Signature");
+                    if (rowIndex != -1)
+                    {
+                        sig = rlist.ElementAt(rowIndex);
+                    }
 
                     result.Add(
                         new ExtrinsicData
@@ -213,7 +281,10 @@ namespace WebApi.Tools
                                 Success = "1",
                                 CodecError = "false",
                                 SignedbyAddress = "1",
-                                SignedbyIndex = "0"
+                                SignedbyIndex = "0",
+                                Nonce = nonce,
+                                Signature = sig,
+                                Documentation = string.Join(' ', i.Key.Rows.Documentation)
                             }
                         }
                     );
@@ -239,14 +310,10 @@ namespace WebApi.Tools
                 while (index < i.Value.Count())
                 {
                     var rlist = i.Value.Skip((c - 1) * size).Take(size);
-                    string blockNumber;
+                    string blockNumber = string.Empty;
                     if (i.Key.Rows.UseBlockNumber == true)
                     {
                         blockNumber = rlist.ElementAt(size - 1);
-                    }
-                    else
-                    {
-                        blockNumber = "0";
                     }
 
                     var block = "0";
@@ -254,6 +321,24 @@ namespace WebApi.Tools
                     if (rowIndex != -1)
                     {
                         block = rlist.ElementAt(rowIndex);
+                    }
+                    else
+                    {
+                        block = $"{blockNumber}-{c}";
+                    }
+
+                    string nonce = string.Empty;
+                    rowIndex = i.Key.Rows.GetRowNumber("Nonce");
+                    if (rowIndex != -1)
+                    {
+                        nonce = rlist.ElementAt(rowIndex);
+                    }
+
+                    string sig = string.Empty;
+                    rowIndex = i.Key.Rows.GetRowNumber("Signature");
+                    if (rowIndex != -1)
+                    {
+                        sig = rlist.ElementAt(rowIndex);
                     }
 
                     result.Add(
@@ -269,13 +354,9 @@ namespace WebApi.Tools
                                 CodecError = "false",
                                 SignedbyAddress = "1",
                                 SignedbyIndex = "0",
-                                //Params = new IncludeExtrinsicAttributeParams
-                                //{
-                                //    Name = i.Key.MethodName,
-                                //    Type = "Type::T",
-                                //    ValueRaw = "",
-                                //    Value = "",
-                                //}
+                                Nonce = nonce,
+                                Signature = sig,
+                                Documentation = string.Join(' ', i.Key.Rows.Documentation)
                             }
                     );
                     c++;

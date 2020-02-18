@@ -81,6 +81,7 @@ namespace PolkaIndexer
             return 0;
         }
 
+        public string[] Documentation { get; set; }
         public string BlockNumber { get; set; }
         public bool UseBlockNumber { get; set; }
         public bool AutoIncrement { get; set; }
@@ -197,9 +198,8 @@ namespace PolkaIndexer
                                 string keyType = mv8.Module[i].Storage.Items[j].Type.Key1;
                                 string valueType = mv8.Module[i].Storage.Items[j].Type.Value;
 
-                                ts.Rows = new MapRowSchema { Key = keyType, Value = valueType };// ( keyType, valueType);
-
-                                //Console.WriteLine($"CREATE TABLE {tableName}\n    key {keyType} PRIMARY KEY,\n    val {valueType}\n);\n");
+                                ts.Rows = new MapRowSchema { Key = keyType, Value = valueType };
+                                ts.Rows.Documentation = mv8.Module[i].Storage.Items[j].Documentation;
                             }
                             else if (mv8.Module[i].Storage.Items[j].Type.Type == 4) // Double Map - converts to a table with primary key consisting of two columns
                             {
@@ -207,8 +207,7 @@ namespace PolkaIndexer
                                 var key2 = mv8.Module[i].Storage.Items[j].Type.Key2;
                                 var value = mv8.Module[i].Storage.Items[j].Type.Value;
                                 ts.Rows = new DoubleMapRowSchema { Key1 = key1, Key2 = key2, Value = value };
-
-                                //Console.WriteLine($"Map key1: {mv8.Module[i].Storage.Items[j].Type.Key1}, Map key2: {mv8.Module[i].Storage.Items[j].Type.Key2}, Map value: {mv8.Module[i].Storage.Items[j].Type.Value}");
+                                ts.Rows.Documentation = mv8.Module[i].Storage.Items[j].Documentation;
                             }
                         }
                     }
@@ -237,6 +236,7 @@ namespace PolkaIndexer
                                 if (!arg.Name.Equals("id", StringComparison.OrdinalIgnoreCase))
                                 {
                                     rvs.Args.Add(new MapRowSchema { Key = arg.Name, Value = arg.Type, UseBlockNumber = false });
+                                    rvs.Documentation = item.Documentation;
                                 }
                             }
                         }

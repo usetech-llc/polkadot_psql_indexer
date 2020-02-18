@@ -1,4 +1,6 @@
 ﻿using Polkadot.Api;
+using Polkadot.Source.Utils;
+using Polkadot.Utils;
 using PolkaIndexer.DAL;
 using System;
 using System.Configuration;
@@ -9,6 +11,13 @@ namespace PolkaIndexer
     {
         static void Main(string[] args)
         {
+           var h =  Scale.EncodeCompactInteger(7479);
+           var pk = AddressUtils.GetPublicKeyFromAddr("CoqysGbay3t3Q7hXgEmGJJquhYYpo8PqLwvW1WsUwR7KvXm");
+
+            var t1 = "040b005039278c04";
+            var v1 = Scale.DecodeCompactInteger(ref t1);
+            var v2 = Scale.DecodeCompactInteger(ref t1);
+
             MetadataSchema sch = new MetadataSchema();
 
             using (IApplication app = PolkaApi.GetAppication())

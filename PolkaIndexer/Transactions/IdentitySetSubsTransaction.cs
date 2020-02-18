@@ -1,6 +1,7 @@
 ﻿using Polkadot.Data;
 using Polkadot.DataStructs.Metadata;
 using Polkadot.Source.Utils;
+using Polkadot.Utils;
 using PolkaIndexer.DAL;
 using System;
 using System.Collections.Generic;
@@ -8,16 +9,16 @@ using System.Numerics;
 
 namespace PolkaIndexer
 {
-    internal class StakingValidateTransaction : ISpecificTransaction
+    internal class IdentitySetSubsTransaction : ISpecificTransaction
     {
         private IDatabaseAdapdable _dbAdapter;
         private Metadata _metadata;
-        private ExtrinsicInfo _pex;
+        private ExtrinsicInfo pex;
 
         private string sk;
-        private BigInteger amount;
+        private string account;
 
-        public StakingValidateTransaction(IDatabaseAdapdable databaseAdapdable, Metadata metadata)
+        public IdentitySetSubsTransaction(IDatabaseAdapdable databaseAdapdable, Metadata metadata)
         {
             _dbAdapter = databaseAdapdable;
             _metadata = metadata;
@@ -25,24 +26,41 @@ namespace PolkaIndexer
 
         public void Execute()
         {
-            var transfer = new TableName
-            {
-                MethodName = "validate",
-                ModuleName = "Staking"
-            };
+            var fTransfer = new TableName { ModuleName = "Identity", MethodName = "add_registrar" };
 
-            var prefs = new TableRow
+            var accountRow = new TableRow
             {
-                RowIndex = 1,
-                RowName = "prefs",
-                Value = new List<string> { amount.ToString() }
+                RowIndex = 0,
+                RowName = "value",
+                Value = new List<string> { account }
             };
 
             var blocknumber = new TableRow
             {
-                RowIndex = 1,
+                RowIndex = 0,
                 RowName = "blocknumber",
-                Value = new List<string> { _pex.BlockNumber.ToString() }
+                Value = new List<string> { pex.BlockNumber.ToString() }
+            };
+
+            var nonce = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Nonce",
+                Value = new List<string> { pex.Nonce.ToString() }
+            };
+
+            var signatureKey = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Signature",
+                Value = new List<string> { pex.Signature }
+            };
+
+            var status = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Status",
+                Value = new List<string> { pex.Status.ToString() }
             };
 
             var transactionSenderKey = new TableRow
@@ -52,35 +70,7 @@ namespace PolkaIndexer
                 Value = new List<string> { sk }
             };
 
-            var pref = new TableRow
-            {
-                RowIndex = 0,
-                RowName = "Pref",
-                Value = new List<string> { amount.ToString() }
-            };
-
-            var nonce = new TableRow
-            {
-                RowIndex = 0,
-                RowName = "Nonce",
-                Value = new List<string> { _pex.Nonce.ToString() }
-            };
-
-            var signatureKey = new TableRow
-            {
-                RowIndex = 0,
-                RowName = "Signature",
-                Value = new List<string> { _pex.Signature }
-            };
-
-            var status = new TableRow
-            {
-                RowIndex = 0,
-                RowName = "Status",
-                Value = new List<string> { _pex.Status.ToString() }
-            };
-
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { nonce, signatureKey, status, transactionSenderKey, blocknumber, prefs });
+            _dbAdapter.InsertIntoCall(fTransfer, new List<TableRow> { transactionSenderKey, status, nonce, signatureKey, accountRow, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)
@@ -113,10 +103,12 @@ namespace PolkaIndexer
 
             var moduleInd = Scale.NextByte(ref parse);
             var methodInd = Scale.NextByte(ref parse);
+            Scale.NextByte(ref parse);
 
             FunctionCallArgV8[] paramsInfo = null;
 
-            amount = Scale.DecodeCompactInteger(ref parse).Value;
+            //Scale.NextByte(ref parse);
+            account = parse.Substring(0, 64);
 
             // try parse transaction if catch exception that transaction is not supported
             try
@@ -125,8 +117,8 @@ namespace PolkaIndexer
                 var r1 = _metadata.GetModuleCallNameByIds(moduleInd, methodInd);
                 moduleName = r1.Item1;
                 methodName = r1.Item2;
-                if (moduleName.Equals("Staking", StringComparison.InvariantCultureIgnoreCase) &&
-                    methodName.Equals("validate", StringComparison.InvariantCultureIgnoreCase))
+                if (moduleName.Equals("Identity", StringComparison.InvariantCultureIgnoreCase) &&
+                    methodName.Equals("add_registrar", StringComparison.InvariantCultureIgnoreCase))
                     result = true;
             }
             catch (Exception)
@@ -134,7 +126,7 @@ namespace PolkaIndexer
                 return false;
             }
 
-            _pex = new ExtrinsicInfo
+            pex = new ExtrinsicInfo
             {
                 BlockNumber = (int)sb.Block.Header.Number,
                 BlockHash = sb.Block.Header.ParentHash,
@@ -144,11 +136,11 @@ namespace PolkaIndexer
                 MethodIndex = methodInd,
                 MethodName = methodName,
                 Nonce = nonce,
-                Signature = signature,
-                Status = err,
                 ExtrinsicEra = era,
                 Params = parse,
+                Status = err,
                 Unknown = result,
+                Signature = signature,
                 ParamsInfo = paramsInfo
             };
 

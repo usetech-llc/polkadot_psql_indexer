@@ -67,7 +67,29 @@ namespace PolkaIndexer
                 Value = new List<string> { sk }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { transactionSenderKey, keysRow, proofRow, blocknumber });
+
+            var nonce = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Nonce",
+                Value = new List<string> { _pex.Nonce.ToString() }
+            };
+
+            var signatureKey = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Signature",
+                Value = new List<string> { _pex.Signature }
+            };
+
+            var status = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Status",
+                Value = new List<string> { _pex.Status.ToString() }
+            };
+
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { signatureKey, status, nonce, transactionSenderKey, keysRow, proofRow, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)
@@ -75,18 +97,24 @@ namespace PolkaIndexer
             var parse = extrinsic;
 
             parse = parse.Substring(2);
-            Scale.DecodeCompactInteger(ref parse);
+            var t1 = Scale.DecodeCompactInteger(ref parse);
 
-            // nonce + delimiter
-            var nonce = Scale.NextByte(ref parse);
+            // delimiter
+            Scale.NextByte(ref parse);
             Scale.NextByte(ref parse);
 
             // 32 * 2
             var senderPublic = parse.Substring(0, 64);
             parse = parse.Substring(64);
             sk = senderPublic;
+            var era = Scale.NextByte(ref parse);
 
-            parse = parse.Substring(68 * 2);
+            var signature = parse.Substring(0, 128);
+            parse = parse.Substring(128);
+
+            var err = Scale.DecodeCompactInteger(ref parse).Value;
+
+            var nonce = Scale.DecodeCompactInteger(ref parse).Value;
             Scale.NextByte(ref parse);
 
             bool result = false;
@@ -94,7 +122,7 @@ namespace PolkaIndexer
 
             var moduleInd = Scale.NextByte(ref parse);
             var methodInd = Scale.NextByte(ref parse);
-            Scale.NextByte(ref parse);
+
             FunctionCallArgV8[] paramsInfo = null;
 
             while (parse.Length >= 64)
@@ -117,7 +145,7 @@ namespace PolkaIndexer
                     methodName.Equals("set_keys", StringComparison.InvariantCultureIgnoreCase))
                     result = true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
@@ -131,6 +159,8 @@ namespace PolkaIndexer
                 ModuleName = moduleName,
                 MethodIndex = methodInd,
                 MethodName = methodName,
+                Signature = signature,
+                Status = err,
                 Nonce = nonce,
                 ExtrinsicEra = 0,
                 Params = parse,

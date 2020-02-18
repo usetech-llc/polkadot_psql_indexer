@@ -22,7 +22,7 @@ namespace PolkaIndexer.DAL
         // db specific types
         enum DataType : byte
         {
-            [Description("varchar(50)")]
+            [Description("varchar(70)")]
             Address,
 
             [Description("int")]

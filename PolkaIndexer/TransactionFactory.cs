@@ -47,6 +47,17 @@ namespace PolkaIndexer
                 new DemocracySecondTransaction(_dbAdapter, _transactionSchema),
                 new DemocracyVoteTransaction(_dbAdapter, _transactionSchema),
                 new DemocracyCancelReferendumTransaction(_dbAdapter, _transactionSchema),
+                new IdentityAddRegistrarTransaction(_dbAdapter, _transactionSchema),
+                new IdentityCancelRequestTransaction(_dbAdapter, _transactionSchema),
+                new IdentityClearIdentityTransaction(_dbAdapter, _transactionSchema),
+                new IdentityKillIdentityTransaction(_dbAdapter, _transactionSchema),
+                new IdentityProvideJudgementTransaction(_dbAdapter, _transactionSchema),
+                new IdentityRequestJudgementTransaction(_dbAdapter, _transactionSchema),
+                new IdentitySetAccountIdTransaction(_dbAdapter, _transactionSchema),
+                new IdentitySetFeeTransaction(_dbAdapter, _transactionSchema),
+                new IdentitySetFieldsTransaction(_dbAdapter, _transactionSchema),
+                new IdentitySetIdentityTransaction(_dbAdapter, _transactionSchema),
+                new IdentitySetSubsTransaction(_dbAdapter, _transactionSchema),
                 new NotSpecificTransaction(_dbAdapter, _transactionSchema)
             };
         }
@@ -60,7 +71,7 @@ namespace PolkaIndexer
                     if (st.Parse(sb, ex))
                         return st;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     continue;
                 }

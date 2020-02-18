@@ -43,6 +43,7 @@ namespace WebApi.DTO
         public string Error { get; set; }
         public string SpecVersionId { get; set; }
         public string CodecError { get; set; }
+        public string Documentation { get; set; }
     }
 
     public class ExtrinsicData
