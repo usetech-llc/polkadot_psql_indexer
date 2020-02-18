@@ -48,10 +48,12 @@ namespace PolkaIndexer
 
             var tf = new TransactionFactory(new Metadata(_app.GetMetadata(null)), _databaseAdapdable);
 
+            int transactionId = 0;
             foreach (var extrinsic in block.Block.Extrinsic)
             {
                 var specificTransaction = tf.GetTransactionSpecific(block, extrinsic);
-                specificTransaction.Execute();
+                specificTransaction.Execute(transactionId);
+                transactionId++;
             }
         }
 

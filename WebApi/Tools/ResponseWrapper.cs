@@ -28,6 +28,11 @@ namespace WebApi.Tools
                 while (index < i.Value.Count())
                 {
                     var rlist = i.Value.Skip((c - 1) * size).Take(size);
+
+                    var rowIndex = i.Key.Rows.Count() - 2;
+                    string transactionIndex = rlist.ElementAt(rowIndex);
+                    transactionIndex = transactionIndex.Substring(1, transactionIndex.Length - 2);
+
                     string blockNumber;
                     if (i.Key.Rows.UseBlockNumber == true)
                     {
@@ -39,7 +44,7 @@ namespace WebApi.Tools
                     }
 
                     var block = "0";
-                    var rowIndex = i.Key.Rows.GetRowNumber("Block");
+                    rowIndex = i.Key.Rows.GetRowNumber("Block");
                     if (rowIndex != -1)
                     {
                         block = rlist.ElementAt(rowIndex);
@@ -88,7 +93,7 @@ namespace WebApi.Tools
                     }
                     else
                     {
-                        block = $"{blockNumber}-{c}";
+                        block = $"{blockNumber}-{transactionIndex}";
                     }
 
                     string sig = string.Empty;
@@ -144,6 +149,11 @@ namespace WebApi.Tools
                 while (index < i.Value.Count())
                 {
                     var rlist = i.Value.Skip((c - 1) * size).Take(size);
+
+                    var rowIndex = i.Key.Rows.Count() - 2;
+                    string transactionIndex = rlist.ElementAt(rowIndex);
+                    transactionIndex = transactionIndex.Substring(1, transactionIndex.Length - 2);
+
                     string blockNumber;
                     if (i.Key.Rows.UseBlockNumber == true)
                     {
@@ -155,18 +165,18 @@ namespace WebApi.Tools
                     }
 
                     var block = "0";
-                    var rowIndex = i.Key.Rows.GetRowNumber("Block");
+                    rowIndex = i.Key.Rows.GetRowNumber("Block");
                     if (rowIndex != -1)
                     {
                         block = rlist.ElementAt(rowIndex);
                         if (block.Length > 10)
                         {
-                            block = block.Substring(2);
+                            block = $"{block.Substring(2)}-{transactionIndex}";
                         }
                     }
                     else
                     {
-                        block = $"{blockNumber}-{inhInd - 1}";
+                        block = $"{blockNumber}-{transactionIndex}";
                     }
 
                     string nonce = string.Empty;
@@ -190,7 +200,7 @@ namespace WebApi.Tools
                     result.Add(
                         new ExtrinsicData
                         {
-                            Id = $"{blockNumber}-{inhInd - 1}",
+                            Id = $"{block}",
                             Type = "extrinsic",
                             Attributes = new IncludeExtrinsicAttribute
                             {
@@ -245,6 +255,11 @@ namespace WebApi.Tools
                 while (index < i.Value.Count())
                 {
                     var rlist = i.Value.Skip((c - 1) * size).Take(size);
+
+                    var rowIndex = i.Key.Rows.Count() - 2;
+                    string transactionIndex = rlist.ElementAt(rowIndex);
+                    transactionIndex = transactionIndex.Substring(1, transactionIndex.Length - 2);
+
                     string blockNumber;
                     if (i.Key.Rows.UseBlockNumber == true)
                     {
@@ -256,19 +271,19 @@ namespace WebApi.Tools
                     }
 
                     var block = "0";
-                    var rowIndex = i.Key.Rows.GetRowNumber("Block");
+                    rowIndex = i.Key.Rows.GetRowNumber("Block");
                     if (rowIndex != -1)
                     {
-                        block = rlist.ElementAt(rowIndex);
+                        block = $"{rlist.ElementAt(rowIndex)}-{transactionIndex}";
 
                         if (block.Length > 10)
                         {
-                            block = block.Substring(2);
+                            block = $"{blockNumber}-{transactionIndex}";
                         }
                     }
                     else
                     {
-                        block = $"{blockNumber}-{c}";
+                        block = $"{blockNumber}-{transactionIndex}";
                     }
 
                     string nonce = string.Empty;
@@ -288,7 +303,7 @@ namespace WebApi.Tools
                     result.Add(
                         new ExtrinsicData
                         {
-                            Id = $"{blockNumber}-{num}",
+                            Id = $"{block}",
                             Type = "extrinsic",
                             Attributes = new IncludeExtrinsicAttribute
                             {
@@ -330,6 +345,11 @@ namespace WebApi.Tools
                 while (index < i.Value.Count())
                 {
                     var rlist = i.Value.Skip((c - 1) * size).Take(size);
+
+                    var rowIndex = i.Key.Rows.Count() - 2;
+                    string transactionIndex = rlist.ElementAt(rowIndex);
+                    transactionIndex = transactionIndex.Substring(1, transactionIndex.Length - 2);
+
                     string blockNumber = string.Empty;
                     if (i.Key.Rows.UseBlockNumber == true)
                     {
@@ -337,14 +357,14 @@ namespace WebApi.Tools
                     }
 
                     var block = "0";
-                    var rowIndex = i.Key.Rows.GetRowNumber("Block");
+                    rowIndex = i.Key.Rows.GetRowNumber("Block");
                     if (rowIndex != -1)
                     {
                         block = rlist.ElementAt(rowIndex);
                     }
                     else
                     {
-                        block = $"{blockNumber}-{c}";
+                        block = $"{blockNumber}-{transactionIndex}";
                     }
 
                     string nonce = string.Empty;

@@ -65,17 +65,17 @@ namespace PolkaIndexer
 
             if (this is MapRowSchema mrs)
             {   
-                return 3 + add;
+                return 4 + add;
             }
 
             if (this is DoubleMapRowSchema dmrs)
             {
-                return 4 + add;
+                return 5 + add;
             }
 
             if (this is CallRowSchema crs)
             {
-                return crs.Args.Count() + add;
+                return crs.Args.Count() + 1 + add;
             }
 
             return 0;
@@ -83,6 +83,7 @@ namespace PolkaIndexer
 
         public string[] Documentation { get; set; }
         public string BlockNumber { get; set; }
+        public string TransactionIndex { get; set; }
         public bool UseBlockNumber { get; set; }
         public bool AutoIncrement { get; set; }
     }

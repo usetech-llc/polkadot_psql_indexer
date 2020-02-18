@@ -25,7 +25,7 @@ namespace PolkaIndexer
             _metadata = metadata;
         }
 
-        public void Execute()
+        public void Execute(int transactionId)
         {
             // Set FREEBALANCE for participants 
             // Add transfer value
@@ -126,7 +126,14 @@ namespace PolkaIndexer
                 Value = new List<string> { sk }
             };
 
-            _dbAdapter.InsertIntoCall(fTransfer, new List<TableRow> { transactionSenderKey, status, nonce, signatureKey, source, nFree, value2, blocknumber });
+            var tid = new TableRow
+            {
+                RowIndex = 1,
+                RowName = "transactionindex",
+                Value = new List<string> { transactionId.ToString() }
+            };
+
+            _dbAdapter.InsertIntoCall(fTransfer, new List<TableRow> { tid, transactionSenderKey, status, nonce, signatureKey, source, nFree, value2, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)

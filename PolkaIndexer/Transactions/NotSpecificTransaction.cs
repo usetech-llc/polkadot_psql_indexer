@@ -19,7 +19,7 @@ namespace PolkaIndexer
             _metadata = metadata;
         }
 
-        public void Execute()
+        public void Execute(int transactionId)
         {
             var paramsString = _pex.Params;
 
@@ -46,7 +46,8 @@ namespace PolkaIndexer
                 {
                     new TableRow{ RowName = _pex.ParamsInfo[0].Name, Value = new List<string>{ item.ToString() } },
                     new TableRow{ RowName = "blocknumber", Value =  new List<string>{ _pex.BlockNumber.ToString() } },
-                    new TableRow{ RowName = "Block", Value =  new List<string>{ _pex.BlockHash.ToString() } }
+                    new TableRow{ RowName = "Block", Value =  new List<string>{ _pex.BlockHash.ToString() } },
+                    new TableRow{ RowName = "transactionindex", Value = new List<string>{ transactionId.ToString() } }
                 });
             }
         }

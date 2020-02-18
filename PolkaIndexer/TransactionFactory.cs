@@ -8,7 +8,7 @@ namespace PolkaIndexer
 {
     interface ISpecificTransaction
     {
-        void Execute();
+        void Execute(int transactionId);
         bool Parse(SignedBlock sb, string extrinsic);
     }
 

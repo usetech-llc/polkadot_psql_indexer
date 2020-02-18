@@ -26,7 +26,7 @@ namespace PolkaIndexer
             _metadata = metadata;
         }
 
-        public void Execute()
+        public void Execute(int transactionId)
         {
             var bonded = new TableName
             {
@@ -41,6 +41,13 @@ namespace PolkaIndexer
             };
 
             var intAmount = Convert.ToUInt64(amount);
+
+            var tid = new TableRow
+            {
+                RowIndex = 1,
+                RowName = "transactionindex",
+                Value = new List<string> { transactionId.ToString() }
+            };
 
             var part1 = new TableRow
             {
@@ -122,7 +129,7 @@ namespace PolkaIndexer
                 Value = new List<string> { _pex.Status.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { status, blocknumber, nonce, signatureKey, transactionSenderKey, controller, payeeDest, transactionValue, blocknumber });
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { tid, status, blocknumber, nonce, signatureKey, transactionSenderKey, controller, payeeDest, transactionValue, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)

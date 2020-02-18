@@ -12,7 +12,7 @@ namespace PolkaIndexer
             _dbAdapter = dbAdapter;
         }
 
-        public void Execute(ExtrinsicInfo pex)
+        public void Execute(int transactionId)
         {
             throw new System.NotImplementedException();
         }

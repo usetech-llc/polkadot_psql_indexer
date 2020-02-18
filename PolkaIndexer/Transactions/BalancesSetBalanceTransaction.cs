@@ -23,7 +23,7 @@ namespace PolkaIndexer
             _metadata = metadata;
         }
 
-        public void Execute()
+        public void Execute(int transactionId)
         {
             var fb = new TableName { ModuleName = "Balances", MethodName = "FreeBalance" };
             var rb = new TableName { ModuleName = "Balances", MethodName = "ReservedBalance" };
@@ -66,6 +66,13 @@ namespace PolkaIndexer
                 Value = new List<string> { newReserved }
             };
 
+            var tid = new TableRow
+            {
+                RowIndex = 1,
+                RowName = "transactionindex",
+                Value = new List<string> { transactionId.ToString() }
+            };
+
             var transactionSenderKey = new TableRow
             {
                 RowIndex = 0,
@@ -102,7 +109,7 @@ namespace PolkaIndexer
                 Value = new List<string> { pex.Status.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(bsb, new List<TableRow> { status, nonce, signatureKey,  who, nFree, nReserved, blocknumber, transactionSenderKey });
+            _dbAdapter.InsertIntoCall(bsb, new List<TableRow> { tid, status, nonce, signatureKey,  who, nFree, nReserved, blocknumber, transactionSenderKey });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)

@@ -25,7 +25,7 @@ namespace PolkaIndexer
             _metadata = metadata;
         }
 
-        public void Execute()
+        public void Execute(int transactionId)
         {
             var fTransfer = new TableName { ModuleName = "Identity", MethodName = "request_judgement" };
 
@@ -34,6 +34,13 @@ namespace PolkaIndexer
                 RowIndex = 0,
                 RowName = "reg_index",
                 Value = new List<string> { regIndex }
+            };
+
+            var tid = new TableRow
+            {
+                RowIndex = 1,
+                RowName = "transactionindex",
+                Value = new List<string> { transactionId.ToString() }
             };
 
             var maxF = new TableRow
@@ -78,7 +85,7 @@ namespace PolkaIndexer
                 Value = new List<string> { sk }
             };
 
-            _dbAdapter.InsertIntoCall(fTransfer, new List<TableRow> { transactionSenderKey, status, nonce, signatureKey, maxF, regInd, blocknumber });
+            _dbAdapter.InsertIntoCall(fTransfer, new List<TableRow> { tid, transactionSenderKey, status, nonce, signatureKey, maxF, regInd, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)

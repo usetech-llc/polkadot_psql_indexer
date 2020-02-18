@@ -4,7 +4,7 @@ namespace PolkaIndexer
 {
     internal class UnknownTransaction : ISpecificTransaction
     {
-        public void Execute()
+        public void Execute(int transactionId)
         {
             // Empty method. That is unknown specific transaction 
         }

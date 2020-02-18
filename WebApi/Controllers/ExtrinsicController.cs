@@ -32,7 +32,7 @@ namespace WebApi.Controllers
             {
                 Dictionary<TableSchema, IEnumerable<string>> data2;
 
-                if (id.Length > 10 && id.Substring(0, 2).Equals("0x"))
+                if (id.Length > 10)
                 {
                     var ids = id.Split('-');
                     string addId = "";

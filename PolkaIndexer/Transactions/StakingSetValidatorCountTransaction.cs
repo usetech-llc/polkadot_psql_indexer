@@ -23,7 +23,7 @@ namespace PolkaIndexer
             _metadata = metadata;
         }
 
-        public void Execute()
+        public void Execute(int transactionId)
         {
             var transfer = new TableName
             {
@@ -74,7 +74,14 @@ namespace PolkaIndexer
                 Value = new List<string> { _pex.Status.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { signatureKey, status, nonce, transactionSenderKey, newValueRow, blocknumber });
+            var tid = new TableRow
+            {
+                RowIndex = 1,
+                RowName = "transactionindex",
+                Value = new List<string> { transactionId.ToString() }
+            };
+
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { tid, signatureKey, status, nonce, transactionSenderKey, newValueRow, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)

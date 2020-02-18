@@ -22,12 +22,19 @@ namespace PolkaIndexer
             _metadata = metadata;
         }
 
-        public void Execute()
+        public void Execute(int transactionId)
         {
             var transfer = new TableName
             {
                 MethodName = "second",
                 ModuleName = "democracy"
+            };
+
+            var tid = new TableRow
+            {
+                RowIndex = 1,
+                RowName = "transactionindex",
+                Value = new List<string> { transactionId.ToString() }
             };
 
             var proposalHashRow = new TableRow
@@ -73,7 +80,7 @@ namespace PolkaIndexer
                 Value = new List<string> { pex.Status.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { signatureKey, status, nonce, transactionSenderKey, proposalHashRow, blocknumber });
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { tid, signatureKey, status, nonce, transactionSenderKey, proposalHashRow, blocknumber });
         }
 
         public bool Parse(SignedBlock sb, string extrinsic)
