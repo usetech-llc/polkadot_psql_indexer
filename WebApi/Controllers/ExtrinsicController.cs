@@ -51,7 +51,19 @@ namespace WebApi.Controllers
                 }
                 else
                 {
+                    var ids = id.Split('-');
+                    string addId = "";
+
+                    if (ids.Count() > 1)
+                    {
+                        id = ids.ElementAt(0);
+                        addId = ids.ElementAt(1);
+                    }
+
                     data2 = _dataAdapter.GetBlockByNumber(_metadataSchema.DatabaseSchema.TableList.ToArray(), id);
+                    var item = data2.ElementAt(int.Parse(addId));
+                    data2 = new Dictionary<TableSchema, IEnumerable<string>>();
+                    data2.Add(item.Key, item.Value);
                 }
 
                 var result2 = DTO.ExtrinsicResponseSingle.Default();

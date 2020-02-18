@@ -50,18 +50,35 @@ namespace WebApi.Tools
                     }
 
                     var prms = new List<IncludeExtrinsicAttributeParams>();
-                    var schm = (CallRowSchema)i.Key.Rows;
-                    for (var prI = 8; prI < schm.Args.Count; prI++)
+
+                    var rc = i.Key.Rows.Count();
+                    if (rc > 8)
                     {
-                        var si = ((CallRowSchema)i.Key.Rows).Args[prI];
+                        var schm = (CallRowSchema)i.Key.Rows;
+                        for (var prI = 8; prI < schm.Args.Count; prI++)
+                        {
+                            var si = ((CallRowSchema)i.Key.Rows).Args[prI];
+                            prms.Add(new IncludeExtrinsicAttributeParams
+                            {
+                                Name = si.Key,
+                                Type = si.Value,
+                                Value = rlist.ElementAt(prI),
+                                ValueRaw = rlist.ElementAt(prI)
+                            });
+                        }
+                    }
+                    else
+                    {
+                        var item = (MapRowSchema)i.Key.Rows;
                         prms.Add(new IncludeExtrinsicAttributeParams
                         {
-                            Name = si.Key,
-                            Type = si.Value,
-                            Value = rlist.ElementAt(prI),
-                            ValueRaw = rlist.ElementAt(prI)
+                            Name = item.Key,
+                            Type = item.Value,
+                            Value = rlist.ElementAt(0),
+                            ValueRaw = rlist.ElementAt(0)
                         });
                     }
+
 
                     string nonce = string.Empty;
                     rowIndex = i.Key.Rows.GetRowNumber("Nonce");
@@ -117,6 +134,8 @@ namespace WebApi.Tools
         {
             var result = new List<ExtrinsicData>();
 
+            var inhInd = 1;
+
             foreach (var i in data)
             {
                 var c = 1;
@@ -147,7 +166,7 @@ namespace WebApi.Tools
                     }
                     else
                     {
-                        block = $"{blockNumber}-{c}";
+                        block = $"{blockNumber}-{inhInd - 1}";
                     }
 
                     string nonce = string.Empty;
@@ -171,7 +190,7 @@ namespace WebApi.Tools
                     result.Add(
                         new ExtrinsicData
                         {
-                            Id = $"{blockNumber}-{c}",
+                            Id = $"{blockNumber}-{inhInd - 1}",
                             Type = "extrinsic",
                             Attributes = new IncludeExtrinsicAttribute
                             {
@@ -191,6 +210,7 @@ namespace WebApi.Tools
                             }
                         }
                     );
+                    inhInd++;
                     c++;
                     index += size;
                 }
