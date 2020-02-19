@@ -48,7 +48,6 @@ namespace PolkaIndexer
                 curValue = BigInteger.Parse(sval);
             }
 
-            // var curValue = Convert.ToUInt64(_dbAdapter.GetLastStorageValue(freebal, curValueRow));
             var intAmount = BigInteger.Parse(amount);
 
             var part1 = new TableRow

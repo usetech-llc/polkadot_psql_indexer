@@ -37,20 +37,18 @@ namespace PolkaIndexer
                 BlockNumber = _pex.BlockNumber
             };
 
-            ulong curValue = 0;
+            BigInteger curValue = 0;
             var sval = _dbAdapter.GetLastStorageValue(freebal, curValueRow);
             if (!sval.Equals(""))
             {
-                curValue = Convert.ToUInt64(sval);
+                curValue = BigInteger.Parse(sval);
             }
-
-            var intAmount = Convert.ToUInt64(amount);
 
             var part1 = new TableRow
             {
                 RowName = "value",
                 BlockNumber = _pex.BlockNumber,
-                Value = new List<string> { (intAmount + curValue).ToString() }
+                Value = new List<string> { (amount + curValue).ToString() }
             };
 
             _dbAdapter.InsertIntoStorage(freebal, part1);

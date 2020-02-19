@@ -5,6 +5,7 @@ using Polkadot.Utils;
 using PolkaIndexer.DAL;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace PolkaIndexer
 {
@@ -40,7 +41,7 @@ namespace PolkaIndexer
                 ModuleName = "Staking"
             };
 
-            var intAmount = Convert.ToUInt64(amount);
+            var intAmount = BigInteger.Parse(amount);
 
             var tid = new TableRow
             {

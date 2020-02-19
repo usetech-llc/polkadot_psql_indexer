@@ -49,7 +49,7 @@ namespace PolkaIndexer
                 curValue = BigInteger.Parse(sval);
             }
 
-            BigInteger intAmount = Convert.ToUInt64(value);
+            BigInteger intAmount = BigInteger.Parse(value);
 
             var part1 = new TableRow
             {
