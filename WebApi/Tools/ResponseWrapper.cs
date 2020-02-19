@@ -29,8 +29,7 @@ namespace WebApi.Tools
                 {
                     var rlist = i.Value.Skip((c - 1) * size).Take(size);
 
-                    var rowIndex = i.Key.Rows.Count() - 2;
-                    string transactionIndex = rlist.ElementAt(rowIndex);
+                    string transactionIndex = rlist.ElementAt(rlist.Count() - 2);
 
                     if (!(!string.IsNullOrWhiteSpace(addId) && transactionIndex.Equals(addId)))
                     {
@@ -50,7 +49,7 @@ namespace WebApi.Tools
                     }
 
                     var block = "0";
-                    rowIndex = i.Key.Rows.GetRowNumber("Block");
+                    var rowIndex = i.Key.Rows.GetRowNumber("Block");
                     if (rowIndex != -1)
                     {
                         block = rlist.ElementAt(rowIndex);
@@ -109,6 +108,10 @@ namespace WebApi.Tools
                         sig = rlist.ElementAt(rowIndex);
                     }
 
+                    var doc = string.Empty;
+                    if (i.Key.Rows.Documentation != null)
+                        doc = string.Join(' ', i.Key.Rows.Documentation);
+
                     result.Add(
                         new ExtrinsicData
                         {
@@ -129,7 +132,7 @@ namespace WebApi.Tools
                                 SignedbyIndex = "0",
                                 Nonce = nonce,
                                 Signature = sig,
-                                Documentation = string.Join(' ', i.Key.Rows.Documentation),
+                                Documentation = doc,
                                 Params = prms
                             }
                         }
@@ -157,8 +160,7 @@ namespace WebApi.Tools
                 {
                     var rlist = i.Value.Skip((c - 1) * size).Take(size);
 
-                    var rowIndex = i.Key.Rows.Count() - 2;
-                    string transactionIndex = rlist.ElementAt(rowIndex);
+                    string transactionIndex = rlist.ElementAt(rlist.Count() - 2);
 
                     string blockNumber;
                     if (i.Key.Rows.UseBlockNumber == true)
@@ -171,7 +173,7 @@ namespace WebApi.Tools
                     }
 
                     var block = "0";
-                    rowIndex = i.Key.Rows.GetRowNumber("Block");
+                    var rowIndex = i.Key.Rows.GetRowNumber("Block");
                     var el = rowIndex != -1 ? rlist.ElementAt(rowIndex) : string.Empty;
                     if (!string.IsNullOrEmpty(el))
                     {
@@ -264,8 +266,7 @@ namespace WebApi.Tools
                 {
                     var rlist = i.Value.Skip((c - 1) * size).Take(size);
 
-                    var rowIndex = i.Key.Rows.Count() - 2;
-                    string transactionIndex = rlist.ElementAt(rowIndex);
+                    string transactionIndex = rlist.ElementAt(rlist.Count() - 2);
 
                     string blockNumber;
                     if (i.Key.Rows.UseBlockNumber == true)
@@ -278,7 +279,7 @@ namespace WebApi.Tools
                     }
 
                     var block = "0";
-                    rowIndex = i.Key.Rows.GetRowNumber("Block");
+                    var rowIndex = i.Key.Rows.GetRowNumber("Block");
                     if (rowIndex != -1 && string.IsNullOrWhiteSpace(transactionIndex))
                     {
                         block = rlist.ElementAt(rowIndex);
@@ -302,6 +303,10 @@ namespace WebApi.Tools
                         sig = rlist.ElementAt(rowIndex);
                     }
 
+                    var doc = string.Empty;
+                    if (i.Key.Rows.Documentation != null)
+                        doc = string.Join(' ', i.Key.Rows.Documentation);
+
                     result.Add(
                         new ExtrinsicData
                         {
@@ -322,7 +327,7 @@ namespace WebApi.Tools
                                 SignedbyIndex = "0",
                                 Nonce = nonce,
                                 Signature = sig,
-                                Documentation = string.Join(' ', i.Key.Rows.Documentation)
+                                Documentation = doc
                             }
                         }
                     );
@@ -349,8 +354,7 @@ namespace WebApi.Tools
                 {
                     var rlist = i.Value.Skip((c - 1) * size).Take(size);
 
-                    var rowIndex = i.Key.Rows.Count() - 2;
-                    string transactionIndex = rlist.ElementAt(rowIndex);
+                    string transactionIndex = rlist.ElementAt(rlist.Count() - 2);
 
                     string blockNumber = string.Empty;
                     if (i.Key.Rows.UseBlockNumber == true)
@@ -359,7 +363,7 @@ namespace WebApi.Tools
                     }
 
                     var block = "0";
-                    rowIndex = i.Key.Rows.GetRowNumber("Block");
+                    var rowIndex = i.Key.Rows.GetRowNumber("Block");
                     if (rowIndex != -1)
                     {
                         block = rlist.ElementAt(rowIndex);
@@ -383,6 +387,10 @@ namespace WebApi.Tools
                         sig = rlist.ElementAt(rowIndex);
                     }
 
+                    var doc = string.Empty;
+                    if (i.Key.Rows.Documentation != null)
+                        doc = string.Join(' ', i.Key.Rows.Documentation);
+
                     result.Add(
                         new IncludeExtrinsicAttributeEx
                             {
@@ -399,7 +407,7 @@ namespace WebApi.Tools
                                 SignedbyIndex = "0",
                                 Nonce = nonce,
                                 Signature = sig,
-                                Documentation = string.Join(' ', i.Key.Rows.Documentation)
+                                Documentation = doc
                             }
                     );
                     c++;

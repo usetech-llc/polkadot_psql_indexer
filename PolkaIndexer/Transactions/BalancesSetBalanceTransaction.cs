@@ -84,7 +84,7 @@ namespace PolkaIndexer
             {
                 RowIndex = 0,
                 RowName = "blocknumber",
-                Value = new List<string> { newReserved }
+                Value = new List<string> { pex.BlockNumber.ToString() }
             };
 
 

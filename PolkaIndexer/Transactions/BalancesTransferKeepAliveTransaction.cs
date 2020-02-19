@@ -94,6 +94,12 @@ namespace PolkaIndexer
                 Value = new List<string> { amount }
             };
 
+            var blocknumber = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "blocknumber",
+                Value = new List<string> { _pex.BlockNumber.ToString() }
+            };
 
             var nonce = new TableRow
             {
@@ -130,7 +136,7 @@ namespace PolkaIndexer
                 Value = new List<string> { _pex.BlockHash.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { blockHash, tid, status, nonce, signatureKey, transactionDest, transactionValue, transactionSenderKey });
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { blockHash, tid, status, nonce, signatureKey, transactionDest, transactionValue, transactionSenderKey, blocknumber });
         }
 
         public bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)

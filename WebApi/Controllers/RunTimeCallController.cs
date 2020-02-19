@@ -39,7 +39,7 @@ namespace WebApi.Controllers
             foreach (var call in calls)
             {
                 // Detect if call method is callable
-                if (call.MethodName.Length > 0 && Char.IsUpper(call.MethodName[0]))
+                if (call.MethodName != null && call.MethodName.Length > 0 && Char.IsUpper(call.MethodName[0]))
                     continue;
 
                 var rc = new RuntimeCall

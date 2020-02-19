@@ -27,16 +27,39 @@ namespace WebApi
             tables = tables.Where(i => i.Title.Contains("Call")).ToArray();
             tables = tables.Where(i => i.Rows != null && i.Rows.GetRowNumber("Block") != -1).ToArray();
 
-            int num = 0;
-            int.TryParse(addId, out num);
+            int.TryParse(addId, out int num);
 
-            var data = _reader.GetBlockByHash(tables.ToArray(), hash).ElementAt(num);
+            var data = _reader.GetBlockByHash(tables.ToArray(), hash);
+            var result = new Dictionary<TableSchema, IEnumerable<string>>();
 
-            var dic = new Dictionary<TableSchema, IEnumerable<string>>();
+            //var iterIndex = 0;
+            for (var iterIndex = 0; iterIndex < data.Count(); iterIndex++)
+            {
+                var item = data.ElementAt(iterIndex);
+                var filtered = new List<string>();
+                var cr = tables.First(t => t.Title == item.Key).Rows;
 
-            dic.Add(tables.FirstOrDefault(i => i.Title.Equals(data.Key)), data.Value);
+                if (num < 0)
+                {
+                    continue;
+                }
 
-            return dic;
+                for (var intIterIndex = 0; intIterIndex * cr.Count() < item.Value.Count(); intIterIndex++)
+                {
+                    var cdi = item.Value.Skip(intIterIndex * cr.Count()).Take(cr.Count());
+
+                    if (cdi.ElementAt(cdi.Count() - 2) == addId)
+                    {
+                        filtered.AddRange(cdi);
+                    }
+
+                }
+
+                if (filtered.Count() > 0)
+                    result.Add(tables.FirstOrDefault(i => i.Title.Equals(item.Key)), filtered);
+            }
+
+            return result;
         }
 
         public Dictionary<TableSchema, IEnumerable<string>> GetBlockByNumber(TableSchema[] tablesSql, string number)
@@ -104,17 +127,42 @@ namespace WebApi
 
         public Dictionary<TableSchema, IEnumerable<string>> GetTransactionByHash(TableSchema[] tablesSql, string hash, string addId = "0")
         {
-            var filterSql = $" \"Block\" @> ARRAY['{hash}']::varchar[]";
+            var h = hash.StartsWith("0x") ? hash : "0x" + hash;
+
+            var filterSql = $" \"Block\" @> ARRAY['{h}']::varchar[]";
             var tables = _md.DatabaseSchema.TableList.Where(i => i.Rows != null && i.Rows.GetRowNumber("Block") != -1).ToArray();
 
-            int num = 0;
-            int.TryParse(addId, out num);
 
-            var data = _reader.GetTransactionList(tables, filterSql).ElementAt(num);
-            var dic = new Dictionary<TableSchema, IEnumerable<string>>();
-            dic.Add(tables.FirstOrDefault(i => i.Title.Equals(data.Key)), data.Value);
+            int.TryParse(addId, out int num);
 
-            return dic;
+            var data = _reader.GetBlockByHash(tables.ToArray(), hash);
+            var result = new Dictionary<TableSchema, IEnumerable<string>>();
+
+            for (var iterIndex = 0; iterIndex < data.Count(); iterIndex++)
+            {
+                var item = data.ElementAt(iterIndex);
+                var filtered = new List<string>();
+                var cr = tables.First(t => t.Title == item.Key).Rows;
+
+                if (num < 0)
+                {
+                    continue;
+                }
+
+                while (iterIndex * cr.Count() < item.Value.Count())
+                {
+                    var cdi = item.Value.Skip(iterIndex * cr.Count()).Take(cr.Count());
+
+                    if (cdi.ElementAt(cdi.Count() - 2) == addId)
+                    {
+                        filtered.AddRange(cdi);
+                    }
+                }
+
+                result.Add(tables.FirstOrDefault(i => i.Title.Equals(item.Key)), filtered);
+            }
+
+            return result;
         }
     }
 }
