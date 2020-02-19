@@ -44,13 +44,11 @@ namespace PolkaIndexer
                 curValue = BigInteger.Parse(sval);
             }
 
-            var intAmount = BigInteger.Parse(amount);
-
             var part1 = new TableRow
             {
                 RowName = "value",
                 BlockNumber = _pex.BlockNumber,
-                Value = new List<string> { (intAmount + curValue).ToString() }
+                Value = new List<string> { (amount + curValue).ToString() }
             };
 
             _dbAdapter.InsertIntoStorage(freebal, part1);
