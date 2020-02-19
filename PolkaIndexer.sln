@@ -12,7 +12,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Polkadot", "lib\api\Polkado
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schnorrkel", "lib\api\Schnorrkel\Schnorrkel.csproj", "{2E9F69F2-F527-459E-83B1-6379B78BA935}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi.csproj", "{71303C99-7714-40BB-919B-04862FD08565}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "WebApi\WebApi.csproj", "{71303C99-7714-40BB-919B-04862FD08565}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IndexerTest", "IndexerTest\IndexerTest.csproj", "{5F7AB25F-C65F-4B01-B606-03576D7C657C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7F1A9029-084D-4D38-908A-3EAAAF099743} = {7F1A9029-084D-4D38-908A-3EAAAF099743}
+		{C1680492-F6B1-4325-8506-A1B89344BA22} = {C1680492-F6B1-4325-8506-A1B89344BA22}
+		{2E9F69F2-F527-459E-83B1-6379B78BA935} = {2E9F69F2-F527-459E-83B1-6379B78BA935}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +61,14 @@ Global
 		{71303C99-7714-40BB-919B-04862FD08565}.Release|Any CPU.Build.0 = Release|Any CPU
 		{71303C99-7714-40BB-919B-04862FD08565}.Release|x64.ActiveCfg = Release|Any CPU
 		{71303C99-7714-40BB-919B-04862FD08565}.Release|x64.Build.0 = Release|Any CPU
+		{5F7AB25F-C65F-4B01-B606-03576D7C657C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F7AB25F-C65F-4B01-B606-03576D7C657C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F7AB25F-C65F-4B01-B606-03576D7C657C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5F7AB25F-C65F-4B01-B606-03576D7C657C}.Debug|x64.Build.0 = Debug|Any CPU
+		{5F7AB25F-C65F-4B01-B606-03576D7C657C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F7AB25F-C65F-4B01-B606-03576D7C657C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F7AB25F-C65F-4B01-B606-03576D7C657C}.Release|x64.ActiveCfg = Release|Any CPU
+		{5F7AB25F-C65F-4B01-B606-03576D7C657C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

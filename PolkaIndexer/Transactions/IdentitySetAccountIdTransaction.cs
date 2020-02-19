@@ -85,10 +85,17 @@ namespace PolkaIndexer
                 Value = new List<string> { sk }
             };
 
-            _dbAdapter.InsertIntoCall(fTransfer, new List<TableRow> { tid, transactionSenderKey, status, nonce, signatureKey, newValueRow, indexRow, blocknumber });
+            var blockHash = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Block",
+                Value = new List<string> { pex.BlockHash.ToString() }
+            };
+
+            _dbAdapter.InsertIntoCall(fTransfer, new List<TableRow> { blockHash, tid, transactionSenderKey, status, nonce, signatureKey, newValueRow, indexRow, blocknumber });
         }
 
-        public bool Parse(SignedBlock sb, string extrinsic)
+        public bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
         {
             var parse = extrinsic;
 
@@ -118,7 +125,7 @@ namespace PolkaIndexer
 
             var moduleInd = Scale.NextByte(ref parse);
             var methodInd = Scale.NextByte(ref parse);
-            index = Scale.DecodeCompactInteger(ref parse).ToString();
+            index = Scale.DecodeCompactInteger(ref parse).Value.ToString();
 
             FunctionCallArgV8[] paramsInfo = null;
 
@@ -145,7 +152,7 @@ namespace PolkaIndexer
             pex = new ExtrinsicInfo
             {
                 BlockNumber = (int)sb.Block.Header.Number,
-                BlockHash = sb.Block.Header.ParentHash,
+                BlockHash = bh.Hash,
                 Raw = extrinsic,
                 ModuleIndex = moduleInd,
                 ModuleName = moduleName,

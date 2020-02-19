@@ -52,7 +52,7 @@ namespace PolkaIndexer
             }
         }
 
-        public bool Parse(SignedBlock sb, string extrinsic)
+        public bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
         {
             bool result = false;
             var ex = extrinsic.Substring(2);
@@ -85,7 +85,7 @@ namespace PolkaIndexer
             _pex = new ExtrinsicInfo
             {
                 BlockNumber = (int)sb.Block.Header.Number,
-                BlockHash = sb.Block.Header.ParentHash,
+                BlockHash = bh.Hash,
                 Raw = extrinsic,
                 ModuleIndex = moduleInd,
                 ModuleName = moduleName,

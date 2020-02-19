@@ -51,13 +51,13 @@ namespace PolkaIndexer
             int transactionId = 0;
             foreach (var extrinsic in block.Block.Extrinsic)
             {
-                var specificTransaction = tf.GetTransactionSpecific(block, extrinsic);
+                var specificTransaction = tf.GetTransactionSpecific(blockHash, block, extrinsic);
                 specificTransaction.Execute(transactionId);
                 transactionId++;
             }
         }
 
-        internal void Scan()
+        public void Scan()
         {
             var lastBlock = _app.GetBlock(null);
 

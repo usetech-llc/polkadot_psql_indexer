@@ -35,7 +35,7 @@ namespace PolkaIndexer
                 ModuleName = "Staking"
             };
 
-            var payee = new TableName
+            var payee1 = new TableName
             {
                 MethodName = "payee",
                 ModuleName = "Staking"
@@ -65,7 +65,7 @@ namespace PolkaIndexer
             };
 
             _dbAdapter.InsertIntoStorage(bonded, part1);
-            _dbAdapter.InsertIntoStorage(payee, part2);
+            _dbAdapter.InsertIntoStorage(payee1, part2);
 
             var transactionSenderKey = new TableRow
             {
@@ -84,14 +84,14 @@ namespace PolkaIndexer
             {
                 RowIndex = 0,
                 RowName = "controller",
-                Value = new List<string> { sk }
+                Value = new List<string> { rk }
             };
 
             var payeeDest = new TableRow
             {
                 RowIndex = 0,
                 RowName = "payee",
-                Value = new List<string> { rk }
+                Value = new List<string> { payee }
             };
 
             var transactionValue = new TableRow
@@ -130,10 +130,17 @@ namespace PolkaIndexer
                 Value = new List<string> { _pex.Status.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { tid, status, blocknumber, nonce, signatureKey, transactionSenderKey, controller, payeeDest, transactionValue, blocknumber });
+            var blockHash = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Block",
+                Value = new List<string> { _pex.BlockHash.ToString() }
+            };
+
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { blockHash, tid, status, blocknumber, nonce, signatureKey, transactionSenderKey, controller, payeeDest, transactionValue });
         }
 
-        public bool Parse(SignedBlock sb, string extrinsic)
+        public bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
         {
             var parse = extrinsic;
 
@@ -191,7 +198,7 @@ namespace PolkaIndexer
             _pex = new ExtrinsicInfo
             {
                 BlockNumber = (int)sb.Block.Header.Number,
-                BlockHash = sb.Block.Header.ParentHash,
+                BlockHash = bh.Hash,
                 Raw = extrinsic,
                 ModuleIndex = moduleInd,
                 ModuleName = moduleName,

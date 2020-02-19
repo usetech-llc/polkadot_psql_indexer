@@ -27,7 +27,7 @@ namespace PolkaIndexer
             throw new System.NotImplementedException();
         }
 
-        public bool Parse(SignedBlock sb, string extrinsic)
+        public bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
         {
             throw new System.NotImplementedException();
         }

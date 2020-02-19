@@ -550,7 +550,7 @@ namespace PolkaIndexer.DAL
             {
                 var sql = $"SELECT * FROM {t.Title}";
 
-                if (t.Rows.GetRowNumber("Block") != -1)
+                if (t.Rows != null && t.Rows.GetRowNumber("Block") != -1)
                 {
                     sql += $" WHERE \"Block\" @> ARRAY['{hsh}']::varchar[]";
                 }

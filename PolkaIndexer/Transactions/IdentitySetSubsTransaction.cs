@@ -16,7 +16,7 @@ namespace PolkaIndexer
         private ExtrinsicInfo pex;
 
         private string sk;
-        private string account;
+        private string subs;
 
         public IdentitySetSubsTransaction(IDatabaseAdapdable databaseAdapdable, Metadata metadata)
         {
@@ -26,13 +26,13 @@ namespace PolkaIndexer
 
         public void Execute(int transactionId)
         {
-            var fTransfer = new TableName { ModuleName = "Identity", MethodName = "add_registrar" };
+            var fTransfer = new TableName { ModuleName = "Identity", MethodName = "set_subs" };
 
-            var accountRow = new TableRow
+            var subsRow = new TableRow
             {
                 RowIndex = 0,
-                RowName = "value",
-                Value = new List<string> { account }
+                RowName = "subs",
+                Value = new List<string> { subs }
             };
 
             var blocknumber = new TableRow
@@ -77,10 +77,17 @@ namespace PolkaIndexer
                 Value = new List<string> { transactionId.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(fTransfer, new List<TableRow> { tid, transactionSenderKey, status, nonce, signatureKey, accountRow, blocknumber });
+            var blockHash = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Block",
+                Value = new List<string> { pex.BlockHash.ToString() }
+            };
+
+            _dbAdapter.InsertIntoCall(fTransfer, new List<TableRow> { blockHash, tid, transactionSenderKey, status, nonce, signatureKey, subsRow, blocknumber });
         }
 
-        public bool Parse(SignedBlock sb, string extrinsic)
+        public bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
         {
             var parse = extrinsic;
 
@@ -115,7 +122,7 @@ namespace PolkaIndexer
             FunctionCallArgV8[] paramsInfo = null;
 
             //Scale.NextByte(ref parse);
-            account = parse.Substring(0, 64);
+            subs = parse;
 
             // try parse transaction if catch exception that transaction is not supported
             try
@@ -125,7 +132,7 @@ namespace PolkaIndexer
                 moduleName = r1.Item1;
                 methodName = r1.Item2;
                 if (moduleName.Equals("Identity", StringComparison.InvariantCultureIgnoreCase) &&
-                    methodName.Equals("add_registrar", StringComparison.InvariantCultureIgnoreCase))
+                    methodName.Equals("set_subs", StringComparison.InvariantCultureIgnoreCase))
                     result = true;
             }
             catch (Exception)
@@ -136,7 +143,7 @@ namespace PolkaIndexer
             pex = new ExtrinsicInfo
             {
                 BlockNumber = (int)sb.Block.Header.Number,
-                BlockHash = sb.Block.Header.ParentHash,
+                BlockHash = bh.Hash,
                 Raw = extrinsic,
                 ModuleIndex = moduleInd,
                 ModuleName = moduleName,

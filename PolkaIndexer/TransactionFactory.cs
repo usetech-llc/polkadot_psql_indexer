@@ -9,7 +9,7 @@ namespace PolkaIndexer
     interface ISpecificTransaction
     {
         void Execute(int transactionId);
-        bool Parse(SignedBlock sb, string extrinsic);
+        bool Parse(BlockHash bh, SignedBlock sb, string extrinsic);
     }
 
     internal class TransactionFactory
@@ -62,13 +62,13 @@ namespace PolkaIndexer
             };
         }
 
-        internal ISpecificTransaction GetTransactionSpecific(SignedBlock sb, string ex)
+        internal ISpecificTransaction GetTransactionSpecific(BlockHash bh, SignedBlock sb, string ex)
         {
             foreach (var st in _specificTransactions)
             {
                 try
                 {
-                    if (st.Parse(sb, ex))
+                    if (st.Parse(bh, sb, ex))
                         return st;
                 }
                 catch (Exception)

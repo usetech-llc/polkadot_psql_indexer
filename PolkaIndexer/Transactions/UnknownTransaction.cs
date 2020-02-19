@@ -9,7 +9,7 @@ namespace PolkaIndexer
             // Empty method. That is unknown specific transaction 
         }
 
-        public bool Parse(SignedBlock sb, string extrinsic)
+        public bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
         {
             return true;
         }
