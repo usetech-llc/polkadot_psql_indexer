@@ -337,5 +337,8 @@ data/
 # Angular compiled files
 **/dist
 
+# Node lock file
+**/package-lock.json
+
 # Config file for Angular app
 **/environment.ts
