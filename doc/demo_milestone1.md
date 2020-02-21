@@ -12,6 +12,8 @@ For convenience the docker-compose file is provided that brings up all needed co
 
 Open a teminal window for DB interaction and run commands to bring database up and connect to it. The `\d` command will display `Did not find any relations.` because the Indexer has not run yet, this is expected.
 
+Note: On some systems it may be needed to add `POSTGRES_HOST_AUTH_METHOD=trust` line to the end of database.env file.
+
 ```
 $ docker-compose build database
 $ docker-compose up -d database
@@ -217,6 +219,61 @@ Nicks module was probably removed from Kusama because we were unable to see it i
 
 * Nicks.set_name
 * Nicks.clear_name
+
+Instead of Nicks module, we integrated Identity module, see below.
+
+##### Identity Module
+
+Switch to milestone1cr1 tag:
+
+```
+git checkout milestone1cr1
+```
+
+...and rebuild and restart the indexer:
+
+```
+docker-compose up --build -d indexer
+```
+
+After indexer runs 2-3 minutes, stop it:
+
+```
+docker stop polkadot_psql_indexer_indexer_1
+```
+
+Change current block to 743970, close to identity module transaction on Kusama:
+
+```
+$ docker-compose run database bash
+# psql --host=database --username=postgres dbname=postgres
+# update settings set value=743970;
+```
+
+Leave this terminal window open
+
+Switch terminal window and start indexer service and wait a minute:
+
+```
+docker start polkadot_psql_indexer_indexer_1 && sleep 60
+```
+
+Switch back to previous terminal window (with database connection open) and check Identity module transactions:
+
+```
+# select * from identitycallset_identity;
+
+# #Expect to see this:
+​ id | Hash |                               Sender                               | Status |                                Block                                 | Times
+tamp | Nonce |                                                             Signature                                                              |                    
+                 info                                     | transactionindex | blocknumber
+----+------+--------------------------------------------------------------------+--------+----------------------------------------------------------------------+------
+-----+-------+------------------------------------------------------------------------------------------------------------------------------------+--------------------
+----------------------------------------------------------+------------------+-------------
+  1 |      | {8c20d46f86242eea89c400d5c478207e05c76bbab29a748af8aac90d627e1a01} | {169}  | {0xd13ab5cba584612dba1d81d4ad1d19d6259657361da0857f85d0ef252e6be204} |      
+     | {12}  | {589d25626aa4f5566fb9dfe3632d12cae128092340d187c3bab174c198bce34505b00fad6ebe5dc6bb3019b676700fb189d912c77a170d322e69de55210b928a} | {0003564f001b687474
+70733a2f2f76616c696461746f72732e6f6e6c696e652f0000000000} | {3}              | {743979}
+```
 
 #### Block scanner is capable of receiving new blocks as well as scanning old blocks
 
