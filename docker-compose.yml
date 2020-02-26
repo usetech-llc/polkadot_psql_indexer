@@ -33,6 +33,16 @@ services:
     build:
       context: .
       dockerfile: WebApi/Dockerfile
-    
+  ui:
+    #depends_on:
+    #  - api
+    networks:
+      - indexer_net
+    ports:
+      - 4200:4200
+    build:
+      context: ./polkascan-pre-explorer-gui
+      dockerfile: Dockerfile
+          
 volumes:
   db-data:
