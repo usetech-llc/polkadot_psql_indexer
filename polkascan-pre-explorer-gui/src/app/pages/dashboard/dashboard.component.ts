@@ -66,24 +66,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.networkTokenSymbol = environment.networkTokenSymbol;
 
     this.getBlocks();
-    this.networkstats$ = this.networkstatsService.get('latest');
+    // this.networkstats$ = this.networkstatsService.get('latest');
 
-    const blockUpdateCounter = interval(6000);
+    // const blockUpdateCounter = interval(6000);
 
-    this.blockUpdateSubsription = blockUpdateCounter.subscribe( n => {
-      this.networkstats$ = this.networkstatsService.get('latest');
-      this.getBlocks();
-    });
+    // this.blockUpdateSubsription = blockUpdateCounter.subscribe( n => {
+    //   this.networkstats$ = this.networkstatsService.get('latest');
+    //   this.getBlocks();
+    // });
   }
 
   getBlocks(): void {
-    this.blockService.all({
-      page: { number: 0}
-    }).subscribe(blocks => (this.blocks = blocks));
+    // this.blockService.all({
+    //   page: { number: 0}
+    // }).subscribe(blocks => (this.blocks = blocks));
 
-    this.balanceTransferService.all({
-      page: { number: 0}
-    }).subscribe(balanceTransfers => (this.balanceTransfers = balanceTransfers));
+    // this.balanceTransferService.all({
+    //   page: { number: 0}
+    // }).subscribe(balanceTransfers => (this.balanceTransfers = balanceTransfers));
   }
 
    search(): void {
@@ -100,6 +100,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     // Will clear when component is destroyed e.g. route is navigated away from.
-    this.blockUpdateSubsription.unsubscribe();
+    // this.blockUpdateSubsription.unsubscribe();
   }
 }
