@@ -6,6 +6,8 @@ networks:
 services:
   database:
     image: postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
     networks:
      - indexer_net
     env_file:
@@ -34,8 +36,8 @@ services:
       context: .
       dockerfile: WebApi/Dockerfile
   ui:
-    #depends_on:
-    #  - api
+    depends_on:
+      - api
     networks:
       - indexer_net
     ports:
