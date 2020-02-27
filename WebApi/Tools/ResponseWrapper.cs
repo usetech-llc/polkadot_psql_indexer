@@ -112,10 +112,12 @@ namespace WebApi.Tools
                     if (i.Key.Rows.Documentation != null)
                         doc = string.Join(' ', i.Key.Rows.Documentation);
 
+                    block = block.StartsWith("0x") ? block.Substring(2) : block;
+
                     result.Add(
                         new ExtrinsicData
                         {
-                            Id = $"{blockNumber}-{c}",
+                            Id = $"{blockNumber}-{transactionIndex}",
                             Type = "extrinsic",
                             Attributes = new IncludeExtrinsicAttributeEx
                             {
@@ -124,7 +126,7 @@ namespace WebApi.Tools
                                 BlockId = blockNumber,
                                 Signed = "1",
                                 Unsigned = "0",
-                                ExtrinsicHash = block,
+                                ExtrinsicHash = $"{blockNumber}-{transactionIndex}",
                                 ExtrinsicIdx = transactionIndex,
                                 Success = "1",
                                 CodecError = "false",
@@ -218,7 +220,7 @@ namespace WebApi.Tools
                                 BlockId = blockNumber,
                                 Signed = "1",
                                 Unsigned = "0",
-                                ExtrinsicHash = block,
+                                ExtrinsicHash = $"{blockNumber}-{transactionIndex}",
                                 Success = "1",
                                 ExtrinsicIdx = transactionIndex,
                                 CodecError = "false",

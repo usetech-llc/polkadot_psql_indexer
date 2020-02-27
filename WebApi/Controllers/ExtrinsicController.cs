@@ -66,8 +66,13 @@ namespace WebApi.Controllers
                    
                 }
 
+                var resultData = ResponseWrapper.Transaction(data2, addId);
+
+                if (resultData == null)
+                    return NotFound();
+
                 var result2 = DTO.ExtrinsicResponseSingle.Default();
-                result2.Data = ResponseWrapper.Transaction(data2, addId);
+                result2.Data = resultData;
 
                 return result2;
             }

@@ -73,15 +73,19 @@ export class AnalyticsSearchComponent implements OnInit {
         }, error => {
           this.loadingCount--;
         }, () => {
-          if (this.extrinsic.attributes.extrinsic_hash) {
-            this.router.navigate(
-              [this.networkURLPrefix, 'transaction', '0x' + this.extrinsic.attributes.extrinsic_hash],
-              { replaceUrl: this.replaceUrl }
-            );
-          } else {
-            this.router.navigate([this.networkURLPrefix, 'inherent', this.extrinsic.id]);
+
+          if (this.extrinsic != null)
+          {
+            if (this.extrinsic.attributes.extrinsic_hash) {
+              this.router.navigate(
+                [this.networkURLPrefix, 'transaction', this.extrinsic.attributes.extrinsic_hash],
+                { replaceUrl: this.replaceUrl }
+              );
+            } else {
+              this.router.navigate([this.networkURLPrefix, 'inherent', this.extrinsic.id]);
+            }
+            this.loadingCount--;
           }
-          this.loadingCount--;
         });
       }
 
