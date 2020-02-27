@@ -90,14 +90,14 @@ namespace WebApi
             // Build sql query 
             if (!string.IsNullOrEmpty(filter.AddressTo))
             {
-                tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Rows.GetRowNumber("dest") > -1));
-                filterList.Add($" dest = {filter.AddressTo}");
+                tables = tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Rows?.GetRowNumber("dest") > -1)).ToList();
+                filterList.Add($" dest = '{{{filter.AddressTo}}}'");
             }
 
             if (!string.IsNullOrEmpty(filter.AddressFrom))
             {
-                tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Rows.GetRowNumber("Sender") > -1));
-                filterList.Add($" Sender = {filter.AddressFrom}");
+                tables = tables.Intersect(_md.DatabaseSchema.TableList.Where(i => i.Rows?.GetRowNumber("Sender") > -1)).ToList();
+                filterList.Add($" \"Sender\" = '{{{filter.AddressFrom}}}'");
             }
 
             if (!string.IsNullOrEmpty(filter.Module))
