@@ -61,3 +61,7 @@ postgres=# select "Sender", "dest" from balancescalltransfer;
  {586cb27c291c813ce74e86a60dad270609abf2fc8bee107e44a80ac00225c409} | {2f9d20a310d47f44f6732252f5bfaab4ee8810fdc592516ce9f689448b045e5e}
 ```
 
+### Consensus Ensurer
+
+Please see deliverables description is the Concensus Ensurer repository:
+https://github.com/usetech-llc/api/tree/master/consensus
