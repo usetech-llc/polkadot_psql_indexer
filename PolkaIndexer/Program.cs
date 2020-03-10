@@ -45,9 +45,14 @@ namespace PolkaIndexer
                         // Parse blocks
                         indexer.Scan();
                     } catch (System.ApplicationException appex) {
+                        Console.WriteLine("ApplicationException caught: " + appex.Message);
                         reconnect = appex.Message.Contains("Not connected");
-                    } catch (Exception) {
-                        reconnect = false;
+                    } catch (Exception e) {
+                        Console.WriteLine("Exception caught: " + e.Message);
+                        if (e.Message.Contains("The operation has timed out"))
+                            reconnect = true;
+                        else
+                            reconnect = false;
                     } finally {
                         app.Disconnect();
                     }

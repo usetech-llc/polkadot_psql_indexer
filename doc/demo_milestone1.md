@@ -15,6 +15,7 @@ Open a teminal window for DB interaction and run commands to bring database up a
 Note: On some systems it may be needed to add `POSTGRES_HOST_AUTH_METHOD=trust` line to the end of database.env file.
 
 ```
+$ git submodule init && git submodule update --recursive
 $ docker-compose build database
 $ docker-compose up -d database
 $ docker-compose run database bash
