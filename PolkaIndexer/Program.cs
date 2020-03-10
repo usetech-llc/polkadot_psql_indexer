@@ -22,26 +22,36 @@ namespace PolkaIndexer
 
             using (IApplication app = PolkaApi.GetAppication())
             {
-                string nodeUrl = ConfigurationManager.AppSettings["Substrate"];
-                app.Connect(nodeUrl);
+                bool reconnect = true;
 
-                // Connect to db and check metadata version
-                var postgres = new Postgres(ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString);
-                var indexer = new Indexer(app, postgres);
+                while (reconnect) {
+                    try {
+                        string nodeUrl = ConfigurationManager.AppSettings["Substrate"];
+                        app.Connect(nodeUrl);
 
-                // Create or update current schema
-                var metadata = app.GetMetadata(null);
-                sch.ParseMetadata(metadata);
-                var si = app.GetSystemInfo();
-                sch.CommitToDb(postgres, si);
+                        // Connect to db and check metadata version
+                        var postgres = new Postgres(ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString);
+                        var indexer = new Indexer(app, postgres);
 
-                // Check current schema
-                indexer.CheckSystemInfo();
+                        // Create or update current schema
+                        var metadata = app.GetMetadata(null);
+                        sch.ParseMetadata(metadata);
+                        var si = app.GetSystemInfo();
+                        sch.CommitToDb(postgres, si);
 
-                // Parse blocks
-                indexer.Scan();
+                        // Check current schema
+                        indexer.CheckSystemInfo();
 
-                app.Disconnect();
+                        // Parse blocks
+                        indexer.Scan();
+                    } catch (System.ApplicationException appex) {
+                        reconnect = appex.Message.Contains("Not connected");
+                    } catch (Exception) {
+                        reconnect = false;
+                    } finally {
+                        app.Disconnect();
+                    }
+                }
             }
 
             Console.ReadLine();
