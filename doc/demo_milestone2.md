@@ -6,7 +6,12 @@ Milestone 2 deliverables are marked by tag [milestone2](https://github.com/usete
 
 ### UI (Implemented in JavaScript)
 
-For convenience the docker-compose file is provided that brings up all needed components. It is possible to use `docker-compose up -d` command to deploy all components at once, but for deliverable clarity instructions below will bring up single components one by one.
+For convenience the docker-compose file is provided that brings up all needed components. Please use the following commands to deploy all components at once:
+
+```
+$ git submodule init && git submodule update --recursive
+$ docker-compose up -d --build
+```
 
 #### Runs web application in a Docker container
 

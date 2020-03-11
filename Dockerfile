@@ -4,7 +4,6 @@ WORKDIR /src
 COPY ["./PolkaIndexer/", "PolkaIndexer/"]
 COPY ["./lib/", "lib/"]
 
-RUN git submodule init && git submodule update --recursive
 RUN dotnet restore lib/api/Polkadot/Polkadot.csproj
 RUN dotnet restore lib/api/Schnorrkel/Schnorrkel.csproj
 COPY . .
