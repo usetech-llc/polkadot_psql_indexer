@@ -57,11 +57,13 @@ namespace PolkaIndexer
             }
         }
 
-        public void Scan()
+        public void Scan(int defaultBlockNum = 0)
         {
             var lastBlock = _app.GetBlock(null);
 
             var lastParsedBlock = Convert.ToInt32(_databaseAdapdable.GetSettingValue<string>("lastParsedBlock"));
+            if (lastParsedBlock == 0)
+                lastParsedBlock = defaultBlockNum;
 
             // perform operation until reach last block 
             while ((int)lastBlock.Block.Header.Number > lastParsedBlock)
