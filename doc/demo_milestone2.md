@@ -19,7 +19,7 @@ See above
 
 #### Search blocks by number and hash
 
-Open this page in your browser: [https://localhost:4200](https://localhost:4200) and enter block number in the search field (make sure this block has been parsed by the indexer).
+Open this page in your browser: [http://localhost:4200](http://localhost:4200) and enter block number in the search field (make sure this block has been parsed by the indexer).
 
 Also, blocks can be searched by hash. For example, here is the hash of block #100: 
 

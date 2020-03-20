@@ -341,4 +341,4 @@ data/
 **/package-lock.json
 
 # Config file for Angular app
-**/environment.ts
+# **/environment.ts
