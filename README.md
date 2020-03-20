@@ -44,3 +44,7 @@ $ docker-compose up -d database
 ### What's Next
 
 After running Indexer and connecting it to the Database, the DB will be populated with tables matching the Substrate metadata, blocks will be analyzed and, as soon as transactions are found, they will be parsed and added to tables ready to be consumed by applications.
+
+## Consensus Ensurer
+
+Consensus Ensurer was developed as a part of this project, but in different repository. Currently the code exists in UseTech JS API fork here: https://github.com/usetech-llc/api/tree/master/consensus

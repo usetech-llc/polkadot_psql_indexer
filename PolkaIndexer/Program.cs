@@ -15,35 +15,50 @@ namespace PolkaIndexer
 
             using (IApplication app = PolkaApi.GetAppication())
             {
-                string nodeUrl = ConfigurationManager.AppSettings["Substrate"];
-                app.Connect(nodeUrl);
+                bool reconnect = true;
 
-                // Connect to db and check metadata version
-                var postgres = new Postgres(ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString);
-                var indexer = new Indexer(app, postgres);
+                while (reconnect) {
+                    try {
+                        string nodeUrl = ConfigurationManager.AppSettings["Substrate"];
+                        app.Connect(nodeUrl);
 
-                // Create or update current schema
-                var MetadataBlockHash = ConfigurationManager.AppSettings["MetadataBlockHash"];
-                var metadata = app.GetMetadata(
-                    MetadataBlockHash.Length > 0 && MetadataBlockHash.StartsWith("0x") ?
-                        new Polkadot.Data.GetMetadataParams
-                        {
-                            BlockHash = MetadataBlockHash
-                        } :
-                        null);
+                        // Connect to db and check metadata version
+                        var postgres = new Postgres(ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString);
+                        var indexer = new Indexer(app, postgres);
 
-                //var metadata = app.GetMetadata(null);
-                sch.ParseMetadata(metadata);
-                var si = app.GetSystemInfo();
-                sch.CommitToDb(postgres, si);
+                        // Create or update current schema
+                        var MetadataBlockHash = ConfigurationManager.AppSettings["MetadataBlockHash"];
+                        var metadata = app.GetMetadata(
+                            MetadataBlockHash.Length > 0 && MetadataBlockHash.StartsWith("0x") ?
+                                new Polkadot.Data.GetMetadataParams
+                                {
+                                    BlockHash = MetadataBlockHash
+                                } :
+                                null);
 
-                // Check current schema
-                indexer.CheckSystemInfo();
+                        //var metadata = app.GetMetadata(null);
+                        sch.ParseMetadata(metadata);
+                        var si = app.GetSystemInfo();
+                        sch.CommitToDb(postgres, si);
 
-                // Parse blocks
-                indexer.Scan();
+                        // Check current schema
+                        indexer.CheckSystemInfo();
 
-                app.Disconnect();
+                        // Parse blocks
+                        indexer.Scan();
+                    } catch (System.ApplicationException appex) {
+                        Console.WriteLine("ApplicationException caught: " + appex.Message);
+                        reconnect = appex.Message.Contains("Not connected");
+                    } catch (Exception e) {
+                        Console.WriteLine("Exception caught: " + e.Message);
+                        if (e.Message.Contains("The operation has timed out"))
+                            reconnect = true;
+                        else
+                            reconnect = false;
+                    } finally {
+                        app.Disconnect();
+                    }
+                }
             }
 
             Console.ReadLine();

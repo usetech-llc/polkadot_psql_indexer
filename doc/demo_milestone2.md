@@ -6,7 +6,12 @@ Milestone 2 deliverables are marked by tag [milestone2](https://github.com/usete
 
 ### UI (Implemented in JavaScript)
 
-For convenience the docker-compose file is provided that brings up all needed components. It is possible to use `docker-compose up -d` command to deploy all components at once, but for deliverable clarity instructions below will bring up single components one by one.
+For convenience the docker-compose file is provided that brings up all needed components. Please use the following commands to deploy all components at once:
+
+```
+$ git submodule init && git submodule update --recursive
+$ docker-compose up -d --build
+```
 
 #### Runs web application in a Docker container
 
@@ -61,3 +66,7 @@ postgres=# select "Sender", "dest" from balancescalltransfer;
  {586cb27c291c813ce74e86a60dad270609abf2fc8bee107e44a80ac00225c409} | {2f9d20a310d47f44f6732252f5bfaab4ee8810fdc592516ce9f689448b045e5e}
 ```
 
+### Consensus Ensurer
+
+Please see deliverables description is the Concensus Ensurer repository:
+https://github.com/usetech-llc/api/tree/master/consensus
