@@ -40,18 +40,20 @@ namespace WebApi
                 });
             });
 
-
-            MetadataSchema sch = MetadataSchema.GetDbg();
-
-            // ConfigurationManager.AppSettings["Substrate"];
-
-            //MetadataSchema sch = new MetadataSchema();
-            //using (IApplication app = PolkaApi.GetAppication())
-            //{
-            //    app.Connect("wss://kusama-rpc.polkadot.io/");
-            //    sch.ParseMetadata(app.GetMetadata(null));
-            //    app.Disconnect();
-            //}
+            MetadataSchema sch = new MetadataSchema();
+            var MetadataBlockHash = ConfigurationManager.AppSettings["MetadataBlockHash"];
+            using (IApplication app = PolkaApi.GetAppication())
+            {
+                app.Connect("wss://kusama-rpc.polkadot.io/");
+                sch.ParseMetadata(
+                    app.GetMetadata(
+                        MetadataBlockHash.Length > 0 && MetadataBlockHash.StartsWith("0x") ? 
+                            new Polkadot.Data.GetMetadataParams {
+                                BlockHash = MetadataBlockHash
+                            } :
+                            null));
+                app.Disconnect();
+            }
 
             var rt = File.ReadAllText("runtime.txt");
 

@@ -11,13 +11,6 @@ namespace PolkaIndexer
     {
         static void Main(string[] args)
         {
-           var h =  Scale.EncodeCompactInteger(7479);
-           var pk = AddressUtils.GetPublicKeyFromAddr("CoqysGbay3t3Q7hXgEmGJJquhYYpo8PqLwvW1WsUwR7KvXm");
-
-            var t1 = "040b005039278c04";
-            var v1 = Scale.DecodeCompactInteger(ref t1);
-            var v2 = Scale.DecodeCompactInteger(ref t1);
-
             MetadataSchema sch = new MetadataSchema();
 
             using (IApplication app = PolkaApi.GetAppication())
@@ -34,7 +27,16 @@ namespace PolkaIndexer
                         var indexer = new Indexer(app, postgres);
 
                         // Create or update current schema
-                        var metadata = app.GetMetadata(null);
+                        var MetadataBlockHash = ConfigurationManager.AppSettings["MetadataBlockHash"];
+                        var metadata = app.GetMetadata(
+                            MetadataBlockHash.Length > 0 && MetadataBlockHash.StartsWith("0x") ?
+                                new Polkadot.Data.GetMetadataParams
+                                {
+                                    BlockHash = MetadataBlockHash
+                                } :
+                                null);
+
+                        //var metadata = app.GetMetadata(null);
                         sch.ParseMetadata(metadata);
                         var si = app.GetSystemInfo();
                         sch.CommitToDb(postgres, si);
