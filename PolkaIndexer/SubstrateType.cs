@@ -55,9 +55,6 @@
         [Description("Forcing")]
         Forcing,
 
-        [Description("Perbill")]
-        Perbill,
-
         [Description("SetId")]
         SetId,
 
