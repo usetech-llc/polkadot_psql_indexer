@@ -27,12 +27,15 @@ namespace PolkaIndexer
                         var indexer = new Indexer(app, postgres);
 
                         // Create or update current schema
-                        var MetadataBlockHash = ConfigurationManager.AppSettings["MetadataBlockHash"];
+                        var metadataBlockHash = ConfigurationManager.AppSettings["MetadataBlockHash"];
+                        var startBlock = 0;
+                        int.TryParse(ConfigurationManager.AppSettings["StartBlockNum"], out startBlock);
+
                         var metadata = app.GetMetadata(
-                            MetadataBlockHash.Length > 0 && MetadataBlockHash.StartsWith("0x") ?
+                            metadataBlockHash.Length > 0 && metadataBlockHash.StartsWith("0x") ?
                                 new Polkadot.Data.GetMetadataParams
                                 {
-                                    BlockHash = MetadataBlockHash
+                                    BlockHash = metadataBlockHash
                                 } :
                                 null);
 
@@ -45,7 +48,7 @@ namespace PolkaIndexer
                         indexer.CheckSystemInfo();
 
                         // Parse blocks
-                        indexer.Scan();
+                        indexer.Scan(startBlock);
                     } catch (System.ApplicationException appex) {
                         Console.WriteLine("ApplicationException caught: " + appex.Message);
                         reconnect = appex.Message.Contains("Not connected");
