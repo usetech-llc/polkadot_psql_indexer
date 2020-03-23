@@ -5,7 +5,7 @@
   </connectionStrings>
   <appSettings>
     <add key="Substrate" value="wss://kusama-rpc.polkadot.io/" />
-    <add key="MetadataBlockHash" value="0x58bc4acfd4f260582103025000a10b517230b8fecf902dcb5cdef343a8c3c662" />
+    <add key="MetadataBlockHash" value="0x32ce9ab7c83a0b11d5a983cd1b27614fc549281c8e2d15cd8e2c34bdd24c13c4" />
     <add key="StartBlockNum" value="700000" />
   </appSettings>
 </configuration>
