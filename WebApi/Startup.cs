@@ -51,7 +51,7 @@ namespace WebApi
                             new Polkadot.Data.GetMetadataParams {
                                 BlockHash = MetadataBlockHash
                             } :
-                            null));
+                            null, true));
                 app.Disconnect();
             }
 

@@ -37,7 +37,7 @@ namespace PolkaIndexer
                                 {
                                     BlockHash = metadataBlockHash
                                 } :
-                                null);
+                                null, true);
 
                         //var metadata = app.GetMetadata(null);
                         sch.ParseMetadata(metadata);
