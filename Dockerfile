@@ -2,6 +2,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS base
 WORKDIR /src
 
 COPY ["./PolkaIndexer/", "PolkaIndexer/"]
+COPY ["./PolkaIndexer/app.config.docker", "PolkaIndexer/app.config"]
 COPY ["./lib/", "lib/"]
 
 RUN dotnet restore lib/api/Polkadot/Polkadot.csproj

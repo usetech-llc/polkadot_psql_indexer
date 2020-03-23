@@ -7,6 +7,7 @@ FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /src
 COPY ["WebApi/WebApi.csproj", "WebApi/"]
 COPY ["WebApi/runtime.txt", "/app/runtime.txt"]
+COPY ["WebApi/app.config.docker", "WebApi/app.config"]
 RUN dotnet restore "WebApi/WebApi.csproj"
 COPY . .
 WORKDIR "/src/WebApi"
