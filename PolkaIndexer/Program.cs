@@ -53,7 +53,7 @@ namespace PolkaIndexer
                         Console.WriteLine("ApplicationException caught: " + appex.Message);
                         reconnect = appex.Message.Contains("Not connected");
                     } catch (Exception e) {
-                        Console.WriteLine("Exception caught: " + e.Message);
+                        Console.WriteLine("Exception caught: " + e.ToString());
                         if (e.Message.Contains("The operation has timed out"))
                             reconnect = true;
                         else
