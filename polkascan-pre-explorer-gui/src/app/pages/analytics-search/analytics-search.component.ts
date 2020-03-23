@@ -90,18 +90,18 @@ export class AnalyticsSearchComponent implements OnInit {
       }
 
       // Search accounts
-      this.loadingCount++;
-      this.accountService.get(this.currentSearchQuery).subscribe(account => {
-        this.account = account;
-      }, error => {
-        this.loadingCount--;
-      }, () => {
-        this.router.navigate(
-          [this.networkURLPrefix, 'account', this.account.id],
-          { replaceUrl: this.replaceUrl }
-          );
-        this.loadingCount--;
-      });
+      // this.loadingCount++;
+      // this.accountService.get(this.currentSearchQuery).subscribe(account => {
+      //   this.account = account;
+      // }, error => {
+      //   this.loadingCount--;
+      // }, () => {
+      //   this.router.navigate(
+      //     [this.networkURLPrefix, 'account', this.account.id],
+      //     { replaceUrl: this.replaceUrl }
+      //     );
+      //   this.loadingCount--;
+      // });
 
       // Search block
       if (this.currentSearchQuery.startsWith('0x') || +this.currentSearchQuery) {
@@ -120,18 +120,18 @@ export class AnalyticsSearchComponent implements OnInit {
       }
 
       // Search account indices
-      this.loadingCount++;
-      this.accountIndexService.get(this.currentSearchQuery).subscribe(accountIndex => {
-        this.accountIndex = accountIndex;
-      }, error => {
-        this.loadingCount--;
-      }, () => {
-        this.router.navigate(
-          [this.networkURLPrefix, 'indices', 'account', this.accountIndex.id],
-          { replaceUrl: this.replaceUrl }
-          );
-        this.loadingCount--;
-      });
+      // this.loadingCount++;
+      // this.accountIndexService.get(this.currentSearchQuery).subscribe(accountIndex => {
+      //   this.accountIndex = accountIndex;
+      // }, error => {
+      //   this.loadingCount--;
+      // }, () => {
+      //   this.router.navigate(
+      //     [this.networkURLPrefix, 'indices', 'account', this.accountIndex.id],
+      //     { replaceUrl: this.replaceUrl }
+      //     );
+      //   this.loadingCount--;
+      // });
     }
   }
 
