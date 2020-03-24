@@ -33,7 +33,7 @@ namespace WebApi.Controllers
                 return null;
 
             var data = (id.Length > 30 && id.Substring(0, 2).Equals("0x")) ? 
-                _dataAdapter.GetBlockByHash(_metadataSchema.DatabaseSchema.TableList.ToArray(), id) : 
+                _dataAdapter.GetBlockByHash(_metadataSchema.DatabaseSchema.TableList.ToArray(), id, "-1") : 
                 _dataAdapter.GetBlockByNumber(_metadataSchema.DatabaseSchema.TableList.ToArray(), id);
 
             if (data == null)

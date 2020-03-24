@@ -39,16 +39,11 @@ namespace WebApi
                 var filtered = new List<string>();
                 var cr = tables.First(t => t.Title == item.Key).Rows;
 
-                if (num < 0)
-                {
-                    continue;
-                }
-
                 for (var intIterIndex = 0; intIterIndex * cr.Count() < item.Value.Count(); intIterIndex++)
                 {
                     var cdi = item.Value.Skip(intIterIndex * cr.Count()).Take(cr.Count());
 
-                    if (cdi.ElementAt(cdi.Count() - 2) == addId)
+                    if ((cdi.ElementAt(cdi.Count() - 2) == addId)||(num < 0))
                     {
                         filtered.AddRange(cdi);
                     }
