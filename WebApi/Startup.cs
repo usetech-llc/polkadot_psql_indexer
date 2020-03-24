@@ -44,14 +44,8 @@ namespace WebApi
             var MetadataBlockHash = ConfigurationManager.AppSettings["MetadataBlockHash"];
             using (IApplication app = PolkaApi.GetAppication())
             {
-                app.Connect("wss://kusama-rpc.polkadot.io/");
-                sch.ParseMetadata(
-                    app.GetMetadata(
-                        MetadataBlockHash.Length > 0 && MetadataBlockHash.StartsWith("0x") ? 
-                            new Polkadot.Data.GetMetadataParams {
-                                BlockHash = MetadataBlockHash
-                            } :
-                            null, true));
+                app.Connect("wss://kusama-rpc.polkadot.io/", MetadataBlockHash);
+                sch.ParseMetadata(app.GetMetadata(null));
                 app.Disconnect();
             }
 
