@@ -12,7 +12,7 @@ For convenience the docker-compose file is provided that brings up all needed co
 $ docker stop $(docker ps -a -q)
 $ docker system prune -a --force
 $ docker volume rm $(docker volume ls -q)
-$ git submodule init && git submodule update --recursive
+$ git submodule init && git submodule update --recursive --remote
 $ docker-compose up -d --build
 ```
 
@@ -26,7 +26,18 @@ In order to skip blocks that don't contain balance transactions, we implemented 
 
 Note that the purpose of indexer is parsing transactions, not empty blocks, so if there were no transactions in a block (e.g. block #700100), it will not be found in the UI.
 
-Open this page in your browser: [http://localhost:4200](http://localhost:4200) and enter block number #700626 in the search field (make sure this block has been parsed by the indexer, it may take a minute to get started). 
+After containers have started, wait approximately 10 minutes to make sure enough blocks have been parsed by the indexer:
+
+```
+$ docker ps
+CONTAINER ID        IMAGE                           COMMAND                  CREATED             STATUS              PORTS                                      NAMES
+d1565168c2ad        polkadot_psql_indexer_ui        "docker-entrypoint.s…"   10 minutes ago      Up 10 minutes       0.0.0.0:4200->4200/tcp                     polkadot_psql_indexer_ui_1
+18469853ba9c        polkadot_psql_indexer_indexer   "dotnet run"             10 minutes ago      Up 10 minutes                                                  polkadot_psql_indexer_indexer_1
+d11233e9cabc        polkadot_psql_indexer_api       "dotnet WebApi.dll"      10 minutes ago      Up 10 minutes       0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp   polkadot_psql_indexer_api_1
+788223bac0b0        postgres                        "docker-entrypoint.s…"   10 minutes ago      Up 10 minutes       0.0.0.0:5432->5432/tcp                     polkadot_psql_indexer_database_1
+```
+
+Open this page in your browser: [http://localhost:4200](http://localhost:4200) and enter block number #700626 in the search field.
 
 Also, blocks can be searched by hash. For example, here is the hash of block #700626: 
 
