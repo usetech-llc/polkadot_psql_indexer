@@ -6,6 +6,6 @@
   <appSettings>
     <add key="Substrate" value="wss://kusama-rpc.polkadot.io/" />
     <add key="ClientUIHost" value="http://localhost:4200" />
-    <add key="MetadataBlockHash" value="0x46781d9a3350a0e02dbea4b5e7aee7c139331a65b2cd736bb45a824c2f3ffd1a" />
+    <add key="MetadataBlockHash" value="0x32ce9ab7c83a0b11d5a983cd1b27614fc549281c8e2d15cd8e2c34bdd24c13c4" />
   </appSettings>
 </configuration>
