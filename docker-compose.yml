@@ -41,7 +41,7 @@ services:
     networks:
       - indexer_net
     ports:
-      - 80:4200
+      - 4200:80
     build:
       context: ./polkascan-pre-explorer-gui
       dockerfile: Dockerfile
