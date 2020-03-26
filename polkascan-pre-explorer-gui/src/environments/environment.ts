@@ -6,7 +6,7 @@
 
 export const environment = {
   production: false,
-  jsonApiRootUrl: 'http://localhost/',
+  jsonApiRootUrl: 'http://localhost:5000/',
   networkName: 'Kusama',
   networkTokenSymbol: 'KSM',
   networkTokenDecimals: 12
