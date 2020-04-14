@@ -21,29 +21,22 @@ In general, if we draw a parallel to relational databases, the one-to-one match 
 * Docker CE 19 or higher
 * Running instance of PostgreSQL Database (can be deployed with provided container, see below)
 
-If needed, configure database connection string and Substrate node URL in `PolkaIndexer/app.config` file. By default, no changes are needed. It is pre-configured to use local database deployed in previous step and Kusama network. 
+If needed, configure database connection string and Substrate node URL in `PolkaIndexer/app.config` file. By default, no changes are needed. It is pre-configured to use local database deployed within the same docker-compose file. 
 
 Execute the following commands in a new terminal window. Indexer will be built and executed in docker container in the background so that it starts indexing and saving blockchain data in PostgreSQL database:
 
 ```
 $ git submodule init
 $ git submodule update
-$ docker-compose build indexer
-$ docker-compose up -d indexer
-```
-
-### Deploying database
-
-Open a teminal window for DB interaction and run commands to bring database up.
-
-```
-$ docker-compose build database
-$ docker-compose up -d database
+$ docker-compose build
+$ docker-compose up -d --build
 ```
 
 ### What's Next
 
 After running Indexer and connecting it to the Database, the DB will be populated with tables matching the Substrate metadata, blocks will be analyzed and, as soon as transactions are found, they will be parsed and added to tables ready to be consumed by applications.
+
+The UI application is also included and will run on port 4200. For a demo, open this page in your browser: [http://localhost:4200](http://localhost:4200) and enter block number #700626 in the search field after the indexer runs for approximately 10 minutes. This UI is copied from Polkascan and pointed to indexer DB instead of Polkascan APIs.
 
 ## Consensus Ensurer
 
