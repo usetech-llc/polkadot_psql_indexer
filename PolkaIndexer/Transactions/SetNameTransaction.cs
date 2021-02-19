@@ -3,7 +3,7 @@ using PolkaIndexer.DAL;
 
 namespace PolkaIndexer
 {
-    internal class SetNameTransaction : ISpecificTransaction
+    internal class SetNameTransaction : SpecificTransaction
     {
         private IDatabaseAdapdable _dbAdapter;
 

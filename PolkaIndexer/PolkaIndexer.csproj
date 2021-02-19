@@ -2,9 +2,49 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Transactions\ArtGalleryCreateCollection.cs" />
+    <Compile Remove="Transactions\BalancesForceTransferTransaction.cs" />
+    <Compile Remove="Transactions\BalancesSetBalanceTransaction.cs" />
+    <Compile Remove="Transactions\BalancesTransferKeepAliveTransaction.cs" />
+    <Compile Remove="Transactions\BalancesTransferTransaction.cs" />
+    <Compile Remove="Transactions\ClearNameTransaction.cs" />
+    <Compile Remove="Transactions\DemocracyCancelReferendumTransaction.cs" />
+    <Compile Remove="Transactions\DemocracyProposeTransaction.cs" />
+    <Compile Remove="Transactions\DemocracySecondTransaction.cs" />
+    <Compile Remove="Transactions\DemocracyVoteTransaction.cs" />
+    <Compile Remove="Transactions\IdentityAddRegistrarTransaction.cs" />
+    <Compile Remove="Transactions\IdentityCancelRequestTransaction.cs" />
+    <Compile Remove="Transactions\IdentityClearIdentityTransaction.cs" />
+    <Compile Remove="Transactions\IdentityKillIdentityTransaction.cs" />
+    <Compile Remove="Transactions\IdentityProvideJudgementTransaction.cs" />
+    <Compile Remove="Transactions\IdentityRequestJudgementTransaction.cs" />
+    <Compile Remove="Transactions\IdentitySetAccountIdTransaction.cs" />
+    <Compile Remove="Transactions\IdentitySetFeeTransaction.cs" />
+    <Compile Remove="Transactions\IdentitySetFieldsTransaction.cs" />
+    <Compile Remove="Transactions\IdentitySetIdentityTransaction.cs" />
+    <Compile Remove="Transactions\IdentitySetSubsTransaction.cs" />
+    <Compile Remove="Transactions\NotSpecificTransaction.cs" />
+    <Compile Remove="Transactions\SessionSetKeysTransaction.cs" />
+    <Compile Remove="Transactions\SetNameTransaction.cs" />
+    <Compile Remove="Transactions\StakingBondExtraTransaction.cs" />
+    <Compile Remove="Transactions\StakingBondTransaction.cs" />
+    <Compile Remove="Transactions\StakingCancelDeferredSlashTransaction.cs" />
+    <Compile Remove="Transactions\StakingChillTransaction.cs" />
+    <Compile Remove="Transactions\StakingForceUnstakeTransaction.cs" />
+    <Compile Remove="Transactions\StakingNominateTransaction.cs" />
+    <Compile Remove="Transactions\StakingSetControllerTransaction.cs" />
+    <Compile Remove="Transactions\StakingSetPayeeTransaction.cs" />
+    <Compile Remove="Transactions\StakingSetValidatorCountTransaction.cs" />
+    <Compile Remove="Transactions\StakingUnbondTransaction.cs" />
+    <Compile Remove="Transactions\StakingValidateTransaction.cs" />
+    <Compile Remove="Transactions\StakingWithdrawUnbondedTransaction.cs" />
+  </ItemGroup>
+    
   <ItemGroup>
     <None Remove="ca-chain.cert.pem" />
   </ItemGroup>
@@ -23,13 +63,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\lib\api\Polkadot.BinarySerializer\Polkadot.BinarySerializer.csproj" />
+    <ProjectReference Include="..\lib\api\Polkadot.NodeTypesGenerator\Polkadot.NodeTypesGenerator.csproj" />
     <ProjectReference Include="..\lib\api\Polkadot\Polkadot.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System">
-      <HintPath>System</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +73,7 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>app.config</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
   </ItemGroup>
 
@@ -44,6 +81,12 @@
     <None Update="app.config">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>app.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="base_types.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="runtime_types.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

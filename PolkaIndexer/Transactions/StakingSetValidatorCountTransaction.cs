@@ -1,4 +1,5 @@
-﻿using Polkadot.Data;
+﻿using Polkadot.BinarySerializer;
+using Polkadot.Data;
 using Polkadot.DataStructs.Metadata;
 using Polkadot.Source.Utils;
 using Polkadot.Utils;
@@ -8,7 +9,7 @@ using System.Collections.Generic;
 
 namespace PolkaIndexer
 {
-    internal class StakingSetValidatorCountTransaction : ISpecificTransaction
+    internal class StakingSetValidatorCountTransaction : SpecificTransaction
     {
         private IDatabaseAdapdable _dbAdapter;
         private Metadata _metadata;

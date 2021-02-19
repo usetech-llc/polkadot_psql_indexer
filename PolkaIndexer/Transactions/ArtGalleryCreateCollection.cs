@@ -10,73 +10,61 @@ using System.Numerics;
 
 namespace PolkaIndexer
 {
-    internal class IdentitySetFeeTransaction : SpecificTransaction
+    internal class ArtGalleryCreateCollection : SpecificTransaction
     {
-        private IDatabaseAdapdable _dbAdapter;
-        private Metadata _metadata;
-        private ExtrinsicInfo pex;
+        private ExtrinsicInfo _pex;
 
         private string sk;
-        private string index;
-        private string fee;
+        private string rk;
+        private string amount;
+        private string signature;
 
-        public IdentitySetFeeTransaction(IDatabaseAdapdable databaseAdapdable, Metadata metadata)
+        public ArtGalleryCreateCollection(string module, string method) : base(module, method)
         {
-            _dbAdapter = databaseAdapdable;
-            _metadata = metadata;
         }
 
-        public void Execute(int transactionId)
+        public override void Execute(int transactionId)
         {
-            var fTransfer = new TableName { ModuleName = "Identity", MethodName = "set_fee" };
-
-            var indexRow = new TableRow
+            var curatorStorage = new TableName
             {
-                RowIndex = 0,
-                RowName = "index",
-                Value = new List<string> { index }
+                MethodName = "curator",
+                ModuleName = "ArtGalleryPallet"
             };
 
-            var feeRow = new TableRow
-            {
-                RowIndex = 0,
-                RowName = "fee",
-                Value = new List<string> { fee }
-            };
+     
 
-            var tid = new TableRow
+            var transfer = new TableName
             {
-                RowIndex = 1,
-                RowName = "transactionindex",
-                Value = new List<string> { transactionId.ToString() }
-            };
-
-            var blocknumber = new TableRow
-            {
-                RowIndex = 0,
-                RowName = "blocknumber",
-                Value = new List<string> { pex.BlockNumber.ToString() }
+                MethodName = "create_collection",
+                ModuleName = "ArtGalleryPallet"
             };
 
             var nonce = new TableRow
             {
                 RowIndex = 0,
                 RowName = "Nonce",
-                Value = new List<string> { pex.Nonce.ToString() }
+                Value = new List<string> { _pex.Nonce.ToString() }
+            };
+
+            var blockHash = new TableRow
+            {
+                RowIndex = 0,
+                RowName = "Block",
+                Value = new List<string> { _pex.BlockHash.ToString() }
             };
 
             var signatureKey = new TableRow
             {
                 RowIndex = 0,
                 RowName = "Signature",
-                Value = new List<string> { pex.Signature }
+                Value = new List<string> { _pex.Signature }
             };
 
             var status = new TableRow
             {
                 RowIndex = 0,
                 RowName = "Status",
-                Value = new List<string> { pex.Status.ToString() }
+                Value = new List<string> { _pex.Status.ToString() }
             };
 
             var transactionSenderKey = new TableRow
@@ -86,17 +74,24 @@ namespace PolkaIndexer
                 Value = new List<string> { sk }
             };
 
-            var blockHash = new TableRow
+            var blocknumber = new TableRow
             {
                 RowIndex = 0,
-                RowName = "Block",
-                Value = new List<string> { pex.BlockHash.ToString() }
+                RowName = "blocknumber",
+                Value = new List<string> { _pex.BlockNumber.ToString() }
             };
 
-            _dbAdapter.InsertIntoCall(fTransfer, new List<TableRow> { blockHash, tid, indexRow, feeRow, transactionSenderKey, status, nonce, signatureKey, blocknumber });
+            var tid = new TableRow
+            {
+                RowIndex = 1,
+                RowName = "transactionindex",
+                Value = new List<string> { transactionId.ToString() }
+            };
+
+            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { blockHash, tid, status, blocknumber, nonce, signatureKey, transactionSenderKey });
         }
 
-        public bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
+        public override bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
         {
             var parse = extrinsic;
 
@@ -113,7 +108,7 @@ namespace PolkaIndexer
             sk = senderPublic;
             var era = Scale.NextByte(ref parse);
 
-            var signature = parse.Substring(0, 128);
+            signature = parse.Substring(0, 128);
             parse = parse.Substring(128);
 
             var err = Scale.DecodeCompactInteger(ref parse).Value;
@@ -126,21 +121,16 @@ namespace PolkaIndexer
 
             var moduleInd = Scale.NextByte(ref parse);
             var methodInd = Scale.NextByte(ref parse);
-
-            FunctionCallArgV8[] paramsInfo = null;
-
-            index = Scale.DecodeCompactInteger(ref parse).Value.ToString();
-            fee = Scale.DecodeCompactInteger(ref parse).Value.ToString();
+       
 
             // try parse transaction if catch exception that transaction is not supported
             try
             {
-                paramsInfo = _metadata.GetModuleCallParamsByIds(moduleInd, methodInd);
                 var r1 = _metadata.GetModuleCallNameByIds(moduleInd, methodInd);
                 moduleName = r1.Item1;
                 methodName = r1.Item2;
-                if (moduleName.Equals("Identity", StringComparison.InvariantCultureIgnoreCase) &&
-                    methodName.Equals("set_fee", StringComparison.InvariantCultureIgnoreCase))
+                if (moduleName.Equals("Balances", StringComparison.InvariantCultureIgnoreCase) && 
+                    methodName.Equals("transfer", StringComparison.InvariantCultureIgnoreCase))
                     result = true;
             }
             catch (Exception)
@@ -148,7 +138,7 @@ namespace PolkaIndexer
                 return false;
             }
 
-            pex = new ExtrinsicInfo
+            _pex = new ExtrinsicInfo
             {
                 BlockNumber = (int)sb.Block.Header.Number,
                 BlockHash = bh.Hash,
@@ -160,10 +150,10 @@ namespace PolkaIndexer
                 Nonce = nonce,
                 ExtrinsicEra = era,
                 Params = parse,
-                Status = err,
-                Unknown = result,
                 Signature = signature,
-                ParamsInfo = paramsInfo
+                Unknown = result,
+                Status = err,
+                ParamsInfo = null
             };
 
             return result;

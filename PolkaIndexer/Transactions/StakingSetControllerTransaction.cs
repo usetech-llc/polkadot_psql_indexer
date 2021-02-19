@@ -1,4 +1,5 @@
-﻿using Polkadot.Data;
+﻿using Polkadot.BinarySerializer;
+using Polkadot.Data;
 using Polkadot.DataStructs.Metadata;
 using Polkadot.Source.Utils;
 using PolkaIndexer.DAL;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 
 namespace PolkaIndexer
 {
-    internal class StakingSetControllerTransaction : ISpecificTransaction
+    internal class StakingSetControllerTransaction : SpecificTransaction
     {
         private IDatabaseAdapdable _dbAdapter;
         private Metadata _metadata;
@@ -92,6 +93,10 @@ namespace PolkaIndexer
         public bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
         {
             var parse = extrinsic;
+
+            //parse = parse.Substring(2);
+            //Scale.NextByte(ref parse);
+            //var t1 = Scale.DecodeCompactInteger(ref parse);
 
             parse = parse.Substring(2);
             var t1 = Scale.DecodeCompactInteger(ref parse);

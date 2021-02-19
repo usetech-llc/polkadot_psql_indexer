@@ -1,4 +1,5 @@
-﻿using Polkadot.Data;
+﻿using Polkadot.BinarySerializer;
+using Polkadot.Data;
 using Polkadot.DataStructs.Metadata;
 using Polkadot.Source.Utils;
 using PolkaIndexer.DAL;
@@ -8,7 +9,7 @@ using System.Numerics;
 
 namespace PolkaIndexer
 {
-    internal class StakingWithdrawUnbondedTransaction : ISpecificTransaction
+    internal class StakingWithdrawUnbondedTransaction : SpecificTransaction
     {
         private IDatabaseAdapdable _dbAdapter;
         private Metadata _metadata;

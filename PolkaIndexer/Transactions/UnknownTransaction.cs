@@ -2,16 +2,10 @@
 
 namespace PolkaIndexer
 {
-    internal class UnknownTransaction : ISpecificTransaction
+    internal class UnknownTransaction : SpecificTransaction
     {
-        public void Execute(int transactionId)
+        public UnknownTransaction(string module, string method): base(module, method)
         {
-            // Empty method. That is unknown specific transaction 
-        }
-
-        public bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
-        {
-            return true;
         }
     }
 }

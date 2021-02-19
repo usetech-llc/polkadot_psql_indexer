@@ -1,7 +1,6 @@
 ﻿using Polkadot.BinarySerializer;
 using Polkadot.Data;
 using Polkadot.DataStructs.Metadata;
-using Polkadot.DataStructs.Metadata.Interfaces;
 using Polkadot.Source.Utils;
 using Polkadot.Utils;
 using PolkaIndexer.DAL;
@@ -11,132 +10,111 @@ using System.Numerics;
 
 namespace PolkaIndexer
 {
-    internal class BalancesTransferTransaction : SpecificTransaction
+    internal class ArtGalleryToggleDisplay : SpecificTransaction
     {
         private ExtrinsicInfo _pex;
 
         private string sk;
-        private string rk;
-        private string amount;
         private string signature;
+        private string collectionId;
+        private string tokenId;
+        private string display;
 
-        public BalancesTransferTransaction(string module, string method) : base(module, method)
+        public ArtGalleryToggleDisplay(string module, string method) : base(module, method)
         {
         }
 
         public override void Execute(int transactionId)
-        {
-            // Set FREEBALANCE for participants 
-            // Add transfer value
+        {         
+            _ = int.TryParse(collectionId, out int colId);
+            _ = int.TryParse(tokenId, out int tokId);
 
-            var freebal = new TableName
+            var toogleDisplayCall = new TableName
             {
-                MethodName = "FreeBalance",
-                ModuleName = "Balances"
-            };
-
-            var curValueRow = new TableRow
-            {
-                RowName = "value",
-                BlockNumber = _pex.BlockNumber
-            };
-
-            BigInteger curValue = 0;
-            var sval = _dbAdapter.GetLastStorageValue(freebal, curValueRow);
-            if (!sval.Equals(""))
-            {
-                curValue = BigInteger.Parse(sval);
-            }
-
-            var intAmount = BigInteger.Parse(amount);
-
-            var part1 = new TableRow
-            {
-                RowName = "value",
-                BlockNumber = _pex.BlockNumber,
-                Value = new List<string> { (curValue - intAmount).ToString() }
-            };
-
-            var part2 = new TableRow
-            {
-                RowName = "value",
-                BlockNumber = _pex.BlockNumber,
-                Value = new List<string> { (curValue + intAmount).ToString() }
-            };
-
-            _dbAdapter.InsertIntoStorage(freebal, part1);
-            _dbAdapter.InsertIntoStorage(freebal, part2);
-
-            var transfer = new TableName
-            {
-                MethodName = "transfer",
-                ModuleName = "Balances"
+                MethodName = "toogle_display",
+                ModuleName = "ArtGalleryPallet"
             };
 
             var nonce = new TableRow
             {
                 RowIndex = 0,
                 RowName = "Nonce",
-                Value = new List<string> { _pex.Nonce.ToString() }
+                Value = new List<string> { $"'{{{_pex.Nonce.ToString()}}}'" }
             };
 
             var blockHash = new TableRow
             {
                 RowIndex = 0,
                 RowName = "Block",
-                Value = new List<string> { _pex.BlockHash.ToString() }
+                Value = new List<string> { $"'{{{_pex.BlockHash.ToString()}}}'" }
             };
 
             var signatureKey = new TableRow
             {
                 RowIndex = 0,
                 RowName = "Signature",
-                Value = new List<string> { _pex.Signature }
+                Value = new List<string> { $"'{{{_pex.Signature.ToString()}}}'" }
             };
 
             var status = new TableRow
             {
                 RowIndex = 0,
                 RowName = "Status",
-                Value = new List<string> { _pex.Status.ToString() }
+                Value = new List<string> { $"'{{{_pex.Status.ToString()}}}'" }
             };
 
             var transactionSenderKey = new TableRow
             {
                 RowIndex = 0,
                 RowName = "Sender",
-                Value = new List<string> { sk }
+                Value = new List<string> { $"'{{{sk.ToString()}}}'" }
             };
 
-            var transactionDest = new TableRow
-            {
-                RowIndex = 0,
-                RowName = "dest",
-                Value = new List<string> { rk }
-            };
-
-            var transactionValue = new TableRow
+            var collectionIdRow = new TableRow
             {
                 RowIndex = 1,
-                RowName = "value",
-                Value = new List<string> { amount }
+                RowName = "collection_id",
+                Value = new List<string> { $"'{{{collectionId.ToString()}}}'" }
             };
+
 
             var blocknumber = new TableRow
             {
                 RowIndex = 0,
                 RowName = "blocknumber",
-                Value = new List<string> { _pex.BlockNumber.ToString() }
+                Value = new List<string> { $"'{{{_pex.BlockNumber.ToString()}}}'" }
+            };
+
+            var colRow = new TableRow
+            {
+                RowIndex = 1,
+                RowName = "collection_id",
+                Value = new List<string> { $"'{{{colId.ToString()}}}'" }
+            };
+
+            var tokRow = new TableRow
+            {
+                RowIndex = 1,
+                RowName = "token_id",
+                Value = new List<string> { $"'{{{tokId.ToString()}}}'" }
+            };
+
+    
+            var displayRow = new TableRow
+            {
+                RowIndex = 1,
+                RowName = "display",
+                Value = new List<string> { $"'{{{display.ToString()}}}'" }
             };
 
             var tid = new TableRow
             {
                 RowIndex = 1,
                 RowName = "transactionindex",
-                Value = new List<string> { transactionId.ToString() }
+                Value = new List<string> { $"'{{{transactionId.ToString()}}}'" }
             };
 
-            _dbAdapter.InsertIntoCall(transfer, new List<TableRow> { blockHash, tid, status, blocknumber, nonce, signatureKey, transactionDest, transactionValue, transactionSenderKey });
+            _dbAdapter.InsertIntoCall(toogleDisplayCall, new List<TableRow> { blockHash, tid, status, blocknumber, nonce, signatureKey, transactionSenderKey, collectionIdRow, colRow, tokRow, displayRow });
         }
 
         public override bool Parse(BlockHash bh, SignedBlock sb, string extrinsic)
@@ -169,24 +147,21 @@ namespace PolkaIndexer
 
             var moduleInd = Scale.NextByte(ref parse);
             var methodInd = Scale.NextByte(ref parse);
-            Scale.NextByte(ref parse);
 
-            rk = parse.Substring(0, 64);
-            parse = parse.Substring(64);
-            //Scale.NextByte(ref parse);
-            amount = Scale.DecodeCompactInteger(ref parse).Value.ToString();
-
-            IEnumerable<ICallArgument> paramsInfo;
+            collectionId = parse.Substring(0, 16);
+            parse = parse.Substring(16);
+            tokenId = parse.Substring(0, 16);
+            parse = parse.Substring(16);
+            display = parse;
 
             // try parse transaction if catch exception that transaction is not supported
             try
             {
-                paramsInfo = _metadata.GetModuleCallParamsByIds(moduleInd, methodInd);
                 var r1 = _metadata.GetModuleCallNameByIds(moduleInd, methodInd);
                 moduleName = r1.Item1;
                 methodName = r1.Item2;
-                if (moduleName.Equals("Balances", StringComparison.InvariantCultureIgnoreCase) && 
-                    methodName.Equals("transfer", StringComparison.InvariantCultureIgnoreCase))
+                if (moduleName.Equals("ArtGalleryPallet", StringComparison.InvariantCultureIgnoreCase) && 
+                    methodName.Equals("toogle_display", StringComparison.InvariantCultureIgnoreCase))
                     result = true;
             }
             catch (Exception)
@@ -209,7 +184,7 @@ namespace PolkaIndexer
                 Signature = signature,
                 Unknown = result,
                 Status = err,
-                ParamsInfo = paramsInfo
+                ParamsInfo = null
             };
 
             return result;

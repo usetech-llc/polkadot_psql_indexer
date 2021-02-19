@@ -1,5 +1,6 @@
 ﻿using Polkadot.Api;
 using Polkadot.Data;
+using System;
 using System.Collections.Generic;
 
 namespace PolkaIndexer.DAL
@@ -15,16 +16,21 @@ namespace PolkaIndexer.DAL
     public interface IDatabaseAdapdable
     {
         void Commit(MetadataSchema schema, SystemInfo systemInfo);
+        void InsertIntoEvent(EventParser ep, List<string> args, string blockHash, string blockNumber);
         bool CheckSystemInfo(SystemInfo systemInfo);
         bool CheckSystemInit();
+        string PlainRowSqlString(PlainRowSchema rowSchema);
         string MapRowSqlString(MapRowSchema rowSchema);
+        void UpdateStorage(TableName tokensStorage, string collectionId, string tokenId, List<TableRow> lists);
         string DoubleMapRowSqlString(DoubleMapRowSchema rowSchema);
         string TableSqlString(TableSchema rowSchema);
         string DatabaseSqlString(DatabaseSchema rowSchema);
         void InsertIntoStorage(TableName tableName, List<TableRow> values);
         void InsertIntoCall(TableName tableName, List<TableRow> values);
+        string GetLastStorageValueByKey(TableName tableName, string key);
         void InsertIntoStorage(TableName tableName, TableRow values);
         void InsertIntoCall(TableName tableName, TableRow values);
+        void DeleteFromStorageByDoubleKey(TableName tokensStorage, string key1, string key2);
         string GetLastStorageValue(TableName tableName, TableRow values);
         T GetSettingValue<T>(string v);
         void SetSettingValue(string name, string value);
@@ -37,7 +43,7 @@ namespace PolkaIndexer.DAL
 
         public override string ToString()
         {
-            return $"{ModuleName}call{MethodName}".ToLower();
+            return $"{ModuleName}{MethodName}".ToLower();
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using Polkadot.Data;
+﻿using Polkadot.BinarySerializer;
+using Polkadot.Data;
 using Polkadot.DataStructs.Metadata;
 using Polkadot.Source.Utils;
 using PolkaIndexer.DAL;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 
 namespace PolkaIndexer
 {
-    internal class SessionSetKeysTransaction : ISpecificTransaction
+    internal class SessionSetKeysTransaction : SpecificTransaction
     {
         private IDatabaseAdapdable _dbAdapter;
         private Metadata _metadata;

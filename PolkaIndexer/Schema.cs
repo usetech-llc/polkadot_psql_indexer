@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace PolkaIndexer
 {
@@ -19,6 +20,7 @@ namespace PolkaIndexer
 
     public abstract class RowSchema 
     {
+
         public RowSchema()
         {
             UseBlockNumber = true;
@@ -26,6 +28,11 @@ namespace PolkaIndexer
 
         public int GetRowNumber(string rowName)
         {
+            if (this is PlainRowSchema prs)
+            {
+                 return 0;
+            }
+
             if (this is MapRowSchema mrs)
             {
                 if (mrs.Key.Equals(rowName))
@@ -88,6 +95,11 @@ namespace PolkaIndexer
         public bool AutoIncrement { get; set; }
     }
 
+    public class PlainRowSchema : RowSchema
+    {
+        public string Value { get; set; }
+    }
+
     public class MapRowSchema : RowSchema
     {
         public string Key { get; set; }
@@ -101,21 +113,42 @@ namespace PolkaIndexer
         public string Value { get; set; }
     }
 
+    public class EventRowSchema : RowSchema
+    {
+        public string Name { get; set; }
+        public List<PlainRowSchema> Args { get; set; }
+
+        public EventRowSchema()
+        {
+            Args = new List<PlainRowSchema>
+            {
+                new PlainRowSchema { Value = "Block" }
+            };
+        }
+
+        public static int DefaultColumnsCount()
+        {
+            return 1;
+        }
+    }
+
     public class CallRowSchema : RowSchema
     {
         public List<MapRowSchema> Args { get; set; }
 
         public CallRowSchema()
         {
-            Args = new List<MapRowSchema>();
-            Args.Add(new MapRowSchema { Key = "Id", Value = "String", UseBlockNumber = false });
-            Args.Add(new MapRowSchema { Key = "Hash", Value = "String", UseBlockNumber = false });
-            Args.Add(new MapRowSchema { Key = "Sender", Value = "String", UseBlockNumber = false });
-            Args.Add(new MapRowSchema { Key = "Status", Value = "String", UseBlockNumber = false });
-            Args.Add(new MapRowSchema { Key = "Block", Value = "String", UseBlockNumber = false });
-            Args.Add(new MapRowSchema { Key = "Timestamp", Value = "String", UseBlockNumber = false });
-            Args.Add(new MapRowSchema { Key = "Nonce", Value = "String", UseBlockNumber = false });
-            Args.Add(new MapRowSchema { Key = "Signature", Value = "String", UseBlockNumber = false });
+            Args = new List<MapRowSchema>
+            {
+                new MapRowSchema { Key = "Id", Value = "String", UseBlockNumber = false },
+                new MapRowSchema { Key = "Hash", Value = "String", UseBlockNumber = false },
+                new MapRowSchema { Key = "Sender", Value = "String", UseBlockNumber = false },
+                new MapRowSchema { Key = "Status", Value = "String", UseBlockNumber = false },
+                new MapRowSchema { Key = "Block", Value = "String", UseBlockNumber = false },
+                new MapRowSchema { Key = "Timestamp", Value = "String", UseBlockNumber = false },
+                new MapRowSchema { Key = "Nonce", Value = "String", UseBlockNumber = false },
+                new MapRowSchema { Key = "Signature", Value = "String", UseBlockNumber = false }
+            };
         }
 
         public static int DefaultColumnsCount()
@@ -132,10 +165,29 @@ namespace PolkaIndexer
         public RowSchema Rows { get; set; }
     }
 
+    public class EventParser
+    {
+        public string ModuleName { get; set; }
+        public string EventName { get; set; }
+        public List<string> ArgsMasks { get; set; }
+
+        public EventParser()
+        {
+            ArgsMasks = new List<string>();
+        }
+    }
+
     public class DatabaseSchema
     {
         public string Title { get; set; }
         public List<TableSchema> TableList { get; set; }
+
+        public List<EventParser> Eparsers { get; set; }
+
+        public DatabaseSchema()
+        {
+            Eparsers = new List<EventParser>();
+        }
 
         public static string GetStringFromTableName(TableName tableName)
         {
@@ -145,10 +197,14 @@ namespace PolkaIndexer
 
     public class MetadataSchema
     {
-        public DatabaseSchema DatabaseSchema { get; private set; }
+        public DatabaseSchema _databaseSchema { get; private set; }
+        public TypeResolver _resolver { get; private set; }
 
         public MetadataSchema()
         {
+            var runtimeTypes = (JObject.Parse(File.ReadAllText(".//runtime_types.json")));
+            var baseTypes = JArray.Parse(File.ReadAllText(".//base_types.json"));
+            _resolver = new TypeResolver(baseTypes.ToObject<IList<PrimitiveType>>(), runtimeTypes.Children());
         }
 
         public static MetadataSchema GetDbg()
@@ -167,86 +223,110 @@ namespace PolkaIndexer
 
         public void ParseMetadata(MetadataBase metadata)
         {
-            DatabaseSchema = new DatabaseSchema { Title = $"Schema_{metadata.Version}" };
-            DatabaseSchema.TableList = new List<TableSchema>();
+            _databaseSchema = new DatabaseSchema { Title = $"Schema_{metadata.Version}" };
+            _databaseSchema.TableList = new List<TableSchema>();
+            var modules = metadata.GetModules();
+            var moduleIndex = 0;
 
-            if (metadata.Version == 8)
+            foreach (var module in modules)
             {
-                var mv8 = (MetadataV8)metadata;
-               // _database = new DatabaseSchema { dbSchema };
+                var moduleName = module.GetName();
+                var storage = module.GetStorages();
 
-                for (int i = 0; i < mv8.Module.Length; i++)
+                // Storage parse
+                foreach (var storageItem in storage)
                 {
-                    string moduleName = mv8.Module[i].Name;
-
-                    // Storage parse
-                    if (null != mv8.Module[i].Storage)
+                    var storageName = storageItem.GetName();
+                    string tableName = $"{moduleName}{storageName}";
+                    var ts = new TableSchema
                     {
-                        for (int j = 0; j < mv8.Module[i].Storage.Items.Length; j++)
+                        Title = tableName,
+                        ModuleName = moduleName,
+                        MethodName = storageName
+                    };
+                    _databaseSchema.TableList.Add(ts);
+
+                    storageItem.GetStorageType().Switch(
+                        (type => {
+                            ts.Rows = new PlainRowSchema { Value = type.Value };
+                        }),
+                        (type =>
                         {
-                            string tableName = $"{moduleName}{mv8.Module[i].Storage.Items[j].Name}";
-                            var ts = new TableSchema {
-                                Title = tableName,
-                                ModuleName = moduleName,
-                                MethodName = mv8.Module[i].Storage.Items[j].Name
-                            };
-                            DatabaseSchema.TableList.Add(ts);
+                            ts.Rows = new MapRowSchema { Key = type.Key, Value = type.Value };
+                        }),
+                        (type =>
+                        {
+                            ts.Rows = new DoubleMapRowSchema { Key1 = type.Key1, Key2 = type.Key2, Value = type.Value };
+                        })
+                    );
+                }
 
-                            if (mv8.Module[i].Storage.Items[j].Type.Type == 0) // Plain
-                            { }
-                            else if (mv8.Module[i].Storage.Items[j].Type.Type == 1) // Map - converts to a tabe with one column key
-                            {
-                                string keyType = mv8.Module[i].Storage.Items[j].Type.Key1;
-                                string valueType = mv8.Module[i].Storage.Items[j].Type.Value;
-
-                                ts.Rows = new MapRowSchema { Key = keyType, Value = valueType };
-                                ts.Rows.Documentation = mv8.Module[i].Storage.Items[j].Documentation;
-                            }
-                            else if (mv8.Module[i].Storage.Items[j].Type.Type == 4) // Double Map - converts to a table with primary key consisting of two columns
-                            {
-                                var key1 = mv8.Module[i].Storage.Items[j].Type.Key1;
-                                var key2 = mv8.Module[i].Storage.Items[j].Type.Key2;
-                                var value = mv8.Module[i].Storage.Items[j].Type.Value;
-                                ts.Rows = new DoubleMapRowSchema { Key1 = key1, Key2 = key2, Value = value };
-                                ts.Rows.Documentation = mv8.Module[i].Storage.Items[j].Documentation;
-                            }
-                        }
-                    }
-
-                    // Calls parse
-                    for (int j = 0; j < mv8.Module[i].Call?.Length; j++)
+                var calls = module.GetCalls();
+                foreach (var call in calls)
+                {
+                    var callName = call.GetName();
+                    string tableName = $"{moduleName}{callName}";
+                    var ts = new TableSchema
                     {
-                        var item = mv8.Module[i].Call[j];
+                        Title = tableName,
+                        ModuleName = moduleName,
+                        MethodName = callName
+                    };
+                    _databaseSchema.TableList.Add(ts);
 
-                        string tableName = $"{moduleName}Call{item.Name}";
-                        var ts = new TableSchema
-                        {
-                            Title = tableName,
-                            ModuleName = moduleName,
-                            MethodName = item.Name
-                        };
-                        DatabaseSchema.TableList.Add(ts);
-
-                        ts.Rows = new CallRowSchema();
-
-                        if (item?.Args != null)
-                        {
-                            foreach (var arg in item.Args)
-                            {
-                                var rvs = (CallRowSchema)ts.Rows;
-                                if (!arg.Name.Equals("id", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    rvs.Args.Add(new MapRowSchema { Key = arg.Name, Value = arg.Type, UseBlockNumber = false });
-                                    rvs.Documentation = item.Documentation;
-                                }
-                            }
-                        }
+                    ts.Rows = new CallRowSchema();
+                    foreach (var arg in call.GetArguments())
+                    {
+                        var rvs = (CallRowSchema)ts.Rows;
+                        rvs.Args.Add(new MapRowSchema { Key = arg.Name, Value = arg.Type, UseBlockNumber = false });
                     }
                 }
-            }
-            else
-            {
-                throw new SchemaException($"Metadata version {metadata.Version} is not supported");
+
+                var events = module.GetEvents();
+                var eventIndex = 0;
+                foreach (var ev in events)
+                {
+                    var evName = ev.GetName();
+                    string tableName = $"{moduleName}{evName}_event";
+                    var ts = new TableSchema
+                    {
+                        Title = tableName,
+                        ModuleName = moduleName,
+                        MethodName = evName
+                    };
+                    _databaseSchema.TableList.Add(ts);
+
+                    // add regex parser 
+                    var parser = new EventParser();
+                    parser.ModuleName = moduleName;
+                    parser.EventName = evName;
+
+                    var rvs = new EventRowSchema();
+                    rvs.Name = evName;
+                    parser.ArgsMasks.Add(moduleIndex.ToString("X2"));
+                    parser.ArgsMasks.Add(eventIndex.ToString("X2"));
+                    foreach (var arg in ev.GetArguments())
+                    {
+                        var rt = _resolver.Resolve(arg);
+                        if (!rt.Any(t => t.Item2.Equals("error")))
+                        { 
+                            foreach(var t in rt)
+                            {
+                                var size = _resolver.GetTypeSize(t.Item2);
+                                var sizeInt = int.Parse(size) * 2;
+
+                                parser.ArgsMasks.Add(".{" + sizeInt.ToString() + "}");
+                            }
+
+                            rvs.Args.Add(new PlainRowSchema { Value = arg });
+                        }
+                    }
+                    ts.Rows = rvs;
+                    _databaseSchema.Eparsers.Add(parser);
+
+                    eventIndex++;
+                }
+                moduleIndex++;
             }
         }
 

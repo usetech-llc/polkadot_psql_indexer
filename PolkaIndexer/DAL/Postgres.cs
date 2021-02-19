@@ -11,6 +11,8 @@ using Polkadot.Data;
 using System.Data;
 using Polkadot.Api;
 using PolkaIndexer.WebApi;
+using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace PolkaIndexer.DAL
 {
@@ -18,6 +20,8 @@ namespace PolkaIndexer.DAL
     {
         private string _connectionString;
         private SubstrateUtils _substrateUtils;
+        private MetadataSchema _dbSchema;
+        private TypeResolver _resolver;
 
         // db specific types
         enum DataType : byte
@@ -48,6 +52,9 @@ namespace PolkaIndexer.DAL
 
             [Description("timestamp")]
             Moment,
+
+            [Description("timestamp")]
+            Moment2,
 
             [Description("bit[1]")]
             BooleanType,
@@ -129,12 +136,19 @@ namespace PolkaIndexer.DAL
             { SubstrateType.ReferendumIndex , DataType.ReferendumIndex },
             { SubstrateType.BooleanType , DataType.BooleanType },
             { SubstrateType.ParaId , DataType.ParaId },
+            { SubstrateType.Moment , DataType.Moment },
+            { SubstrateType.Moment2 , DataType.Moment2 },
+            { SubstrateType.EventIndex , DataType.EventIndex },
         };
 
         public Postgres(string connectionString)
         {
-           _connectionString = connectionString;
+            _connectionString = connectionString;
             _substrateUtils = new SubstrateUtils(TypeMapping);
+
+            var runtimeTypes = (JObject.Parse(File.ReadAllText(".//runtime_types.json")));
+            var baseTypes = JArray.Parse(File.ReadAllText(".//base_types.json"));
+            _resolver = new TypeResolver(baseTypes.ToObject<IList<PrimitiveType>>(), runtimeTypes.Children());
         }
 
         private List<List<object>> ExecuteReaderInsideConnection(string sqlText)
@@ -210,33 +224,37 @@ namespace PolkaIndexer.DAL
 
         public void Commit(MetadataSchema schema, SystemInfo systemInfo)
         {
+            _dbSchema = schema;
             var con = new Npgsql.NpgsqlConnection(_connectionString);
             using (DbConnection db = con)
             {
                 db.Open();
 
-                var dbName = schema.DatabaseSchema.Title;
-                var com = db.CreateCommand();
-                com.CommandText = $"CREATE DATABASE {dbName}";
-                try
+                if (!CheckSystemInfo(systemInfo))
                 {
-                    var result = com.ExecuteNonQuery();
-                    var dbText = DatabaseSqlString(schema.DatabaseSchema);
-
-                    com = db.CreateCommand();
-                    com.CommandText = dbText;
-                    var reader = com.ExecuteReader();
-                }
-                catch(Exception e)
-                {
-                    // 42P04 - database already exist
-                    if (!e.Data["SqlState"].Equals("42P04"))
+                    //var dbName = schema.DatabaseSchema.Title;
+                    var com = db.CreateCommand();
+                    //com.CommandText = $"CREATE DATABASE {dbName}";
+                    try
                     {
-                        throw e;
+                        // var result = com.ExecuteNonQuery();
+                        var dbText = DatabaseSqlString(schema._databaseSchema);
+
+                        com = db.CreateCommand();
+                        com.CommandText = dbText;
+                        var reader = com.ExecuteReader();
                     }
+                    catch (Exception e)
+                    {
+                        // 42P04 - database already exist
+                        if (!e.Data["SqlState"].Equals("42P04"))
+                        {
+                            throw;
+                        }
+                    }
+
+                    WriteSystemInfo(systemInfo);
                 }
-                               
-                WriteSystemInfo(systemInfo);
 
                 //var tables = string.Join(",", schema.DatabaseSchema.TableList.Select(i => i.Title));
 
@@ -258,7 +276,12 @@ namespace PolkaIndexer.DAL
         public string TableSqlString(TableSchema tableSchema)
         {
             string rowsString = string.Empty;
-            if (tableSchema.Rows as MapRowSchema != null)
+
+            if (tableSchema.Rows as PlainRowSchema != null)
+            {
+                rowsString = PlainRowSqlString((PlainRowSchema)tableSchema.Rows);
+            }
+            else if (tableSchema.Rows as MapRowSchema != null)
             {
                 rowsString = MapRowSqlString((MapRowSchema)tableSchema.Rows);
             }
@@ -270,8 +293,64 @@ namespace PolkaIndexer.DAL
             {
                 rowsString = CallRowSchemaSqlString((CallRowSchema)tableSchema.Rows);
             }
+            else if (tableSchema.Rows as EventRowSchema != null)
+            {
+                rowsString = EventRowSchemaSqlString((EventRowSchema)tableSchema.Rows);
+            }
 
             return $"CREATE TABLE {tableSchema.Title} ( {Environment.NewLine} {rowsString} );";
+        }
+
+        public string EventRowSchemaSqlString(EventRowSchema rowSchema)
+        {
+            var blockNumberType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.BlockNumber);
+            string valueRow = string.Empty;
+
+            // resolve types
+            int i = 0;
+            foreach (var type in rowSchema.Args)
+            {
+                var resolvedTypes = _resolver.Resolve(type.Value);
+                if (!resolvedTypes.Any(t => t.Item2.Equals("error")))
+                {
+                    foreach (var rt in resolvedTypes)
+                    {
+                        valueRow += $"{Environment.NewLine} {rowSchema.Name}_{rt.Item1}{i}  varchar[100],"; // {_substrateUtils.SubstrateTypeToStringDBType(rt.Item2)}
+                        i++;
+                    }
+                }
+            }
+
+            return $"id SERIAL PRIMARY KEY, " +
+                $"{valueRow} " +
+                $"{Environment.NewLine} blockHash {blockNumberType}, " +
+                $"{Environment.NewLine} blockNumber {blockNumberType}";
+        }
+
+        public string PlainRowSqlString(PlainRowSchema rowSchema)
+        {
+            var blockNumberType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.BlockNumber);
+            var svalueType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Value);
+            string valueRow = string.Empty;
+
+            // resolve types
+            var types = _resolver.Resolve(rowSchema.Value);
+            if (!types.Any(t => t.Item2.Equals("error")))
+            {
+                foreach (var rt in _resolver.Resolve(rowSchema.Value))
+                {
+                    var name = types.Count() == 1 ? "value" : rt.Item1;
+                    valueRow += $"{Environment.NewLine} {name} {_substrateUtils.SubstrateTypeToStringDBType(rt.Item2)},";
+                }
+            }
+            else
+            {
+                valueRow = $"{Environment.NewLine} value {_substrateUtils.SubstrateTypeToStringDBType(rowSchema.Value)}, ";
+            }
+
+            return $"id SERIAL PRIMARY KEY, " +
+                $"{valueRow} " +
+                $"{Environment.NewLine} blockNumber {blockNumberType}";
         }
 
         public string MapRowSqlString(MapRowSchema rowSchema)
@@ -279,7 +358,26 @@ namespace PolkaIndexer.DAL
             var blockNumberType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.BlockNumber);
             var skeyType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Key);
             var svalueType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Value);
-            return $"id SERIAL PRIMARY KEY, key { skeyType }, {Environment.NewLine} value {svalueType}, {Environment.NewLine} transactionindex varchar[10], {Environment.NewLine} blockNumber {blockNumberType}";
+            string valueRow = string.Empty;
+
+            // resolve types
+            var types = _resolver.Resolve(rowSchema.Value);
+            if (!types.Any(t => t.Item2.Equals("error")))
+            {
+                foreach (var rt in _resolver.Resolve(rowSchema.Value))
+                {
+                    var name = types.Count() == 1 ? "value" : rt.Item1;
+                    valueRow += $"{Environment.NewLine} {name} {_substrateUtils.SubstrateTypeToStringDBType(rt.Item2)},";
+                }
+            } else
+            {
+                valueRow = $"{Environment.NewLine} value {_substrateUtils.SubstrateTypeToStringDBType(rowSchema.Value)}, ";
+            }
+
+            return $"id SERIAL PRIMARY KEY, key { skeyType }, " +
+                $"{valueRow} " +
+                $"{Environment.NewLine} transactionindex varchar[10], " +
+                $"{Environment.NewLine} blockNumber {blockNumberType}";
         }
 
         public string DoubleMapRowSqlString(DoubleMapRowSchema rowSchema)
@@ -287,8 +385,28 @@ namespace PolkaIndexer.DAL
             var blockNumberType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.BlockNumber);
             var skeyType1 = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Key1);
             var skeyType2 = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Key2);
-            var svalueType = _substrateUtils.SubstrateTypeToStringDBType(rowSchema.Value);
-            return $"id SERIAL PRIMARY KEY, key {skeyType1} {Environment.NewLine}, key2 {skeyType2}, {Environment.NewLine} value {svalueType}, {Environment.NewLine} transactionindex varchar[10], {Environment.NewLine} blockNumber {blockNumberType}";
+            string valueRow = string.Empty;
+
+            // resolve types
+            var types = _resolver.Resolve(rowSchema.Value);
+            if (!types.Any(t => t.Item2.Equals("error")))
+            {
+                foreach (var rt in _resolver.Resolve(rowSchema.Value))
+                {
+                    var name = types.Count() == 1 ? "value" : rt.Item1;
+                    valueRow += $"{Environment.NewLine} {name} {_substrateUtils.SubstrateTypeToStringDBType(rt.Item2)},";
+                }
+            }
+            else
+            {
+                valueRow = $"{Environment.NewLine} value {_substrateUtils.SubstrateTypeToStringDBType(rowSchema.Value)}, ";
+            }
+
+            return $"id SERIAL PRIMARY KEY, key {skeyType1} " +
+                $"{Environment.NewLine}, key2 {skeyType2}, " +
+                $"{valueRow} " +
+                $"{Environment.NewLine} transactionindex varchar[10], " +
+                $"{Environment.NewLine} blockNumber {blockNumberType}";
         }
 
         public string CallRowSchemaSqlString(CallRowSchema rowSchema)
@@ -325,28 +443,34 @@ namespace PolkaIndexer.DAL
             using (DbConnection db = con)
             {
                 db.Open();
-
-                var com = db.CreateCommand();
-                com.CommandText = "SELECT * FROM Config";
-                
-                var reader = com.ExecuteReader();
-
-                if (reader.HasRows)
+                try
                 {
-                    while (reader.Read())
+                    var com = db.CreateCommand();
+                    com.CommandText = "SELECT * FROM Config";
+                
+                    var reader = com.ExecuteReader();
+
+                    if (reader.HasRows)
                     {
-                        result = reader.GetString(0).Equals(systemInfo.ChainId, StringComparison.OrdinalIgnoreCase) && 
-                        reader.GetString(1).Equals(systemInfo.ChainName, StringComparison.OrdinalIgnoreCase) &&
-                        reader.GetString(2).Equals(Convert.ToString(systemInfo.TokenDecimals), StringComparison.OrdinalIgnoreCase) &&
-                        reader.GetString(3).Equals(systemInfo.TokenSymbol, StringComparison.OrdinalIgnoreCase) &&
-                        reader.GetString(4).Equals(systemInfo.Version, StringComparison.OrdinalIgnoreCase);
+                        while (reader.Read())
+                        {
+                            result = reader.GetString(0).Equals(systemInfo.ChainId, StringComparison.OrdinalIgnoreCase) && 
+                            reader.GetString(1).Equals(systemInfo.ChainName, StringComparison.OrdinalIgnoreCase) &&
+                            reader.GetString(2).Equals(Convert.ToString(systemInfo.TokenDecimals), StringComparison.OrdinalIgnoreCase) &&
+                            reader.GetString(3).Equals(systemInfo.TokenSymbol, StringComparison.OrdinalIgnoreCase) &&
+                            reader.GetString(4).Equals(systemInfo.Version, StringComparison.OrdinalIgnoreCase);
+                        }
                     }
+                }
+                catch 
+                {
+                    result = false;
                 }
 
                 db.Close();
             }
 
-            return true;
+            return result;
         }
 
         public void WriteSystemInfo(SystemInfo systemInfo)
@@ -367,7 +491,7 @@ namespace PolkaIndexer.DAL
                     // 42P07 - table already exist
                     if (!e.Data["SqlState"].Equals("42P07"))
                     {
-                        throw e;
+                        throw;
                     }
                 }
 
@@ -382,7 +506,7 @@ namespace PolkaIndexer.DAL
                     // 42P07 - table already exist
                     if (!e.Data["SqlState"].Equals("42P07"))
                     {
-                        throw e;
+                        throw;
                     }
                 }
 
@@ -394,6 +518,11 @@ namespace PolkaIndexer.DAL
             }
         }
 
+        public void DeleteFromStorageByDoubleKey(TableName tableName, string key1, string key2)
+        {
+            ExecuteCommandInsideConnection($"DELETE FROM {tableName.ModuleName}{tableName.MethodName} WHERE key={key1} and key2={key2}");
+        }
+
         public void InsertIntoStorage(TableName tableName, List<TableRow> values)
         {
             string fieldsRaw = string.Empty;
@@ -401,16 +530,29 @@ namespace PolkaIndexer.DAL
             {
                 fieldsRaw += $"{v.RowName} ,";
             }
-            var fields = fieldsRaw.Substring(0, fieldsRaw.Length - 2);
+            var fields = fieldsRaw[0..^2];
 
             var dbValues = string.Empty;
             foreach (var v in values)
             {
-                dbValues += $"{v.Value} ,";
+                dbValues += $"{v.Value[0]} ,";
             }
-            var valuesString = dbValues.Substring(0, fieldsRaw.Length - 2);
+            var valuesString = dbValues[0..^2];
 
-            var sql = $"INSERT INTO {tableName.ModuleName}_{tableName.MethodName} ({fields}) VALUES ({valuesString})";
+            var sql = $"INSERT INTO {tableName.ModuleName}{tableName.MethodName} ({fields}) VALUES ({valuesString})";
+            ExecuteCommandInsideConnection(sql);
+        }
+
+        public void UpdateStorage(TableName tableName, string key1, string key2, List<TableRow> values)
+        {
+            string fieldsRaw = string.Empty;
+            foreach (var v in values)
+            {
+                fieldsRaw += $"{v.RowName} = {v.Value[0]},";
+            }
+            var fields = fieldsRaw[0..^2];
+
+            var sql = $"UPDATE {tableName.ModuleName}{tableName.MethodName} SET ({fields}) WHERE key={key1} AND key2={key2}";
             ExecuteCommandInsideConnection(sql);
         }
 
@@ -434,7 +576,7 @@ namespace PolkaIndexer.DAL
             var dbValues = string.Empty;
             foreach (var v in values)
             {
-                dbValues += $"'{{{v.Value[0]}}}' ,";
+                dbValues += $"{v.Value[0]} ,";
             }
             var valuesString = dbValues.Substring(0, dbValues.Length - 2);
 
@@ -467,6 +609,65 @@ namespace PolkaIndexer.DAL
         public void InsertIntoCall(TableName tableName, TableRow values)
         {
             throw new NotImplementedException();
+        }
+
+        public void InsertIntoEvent(EventParser ep, List<string> args, string blockHash, string blockNumber)
+        {
+            var tableName = (ep.ModuleName + ep.EventName + "_event").ToLower();
+
+            var getColumnsNamesSql = $"SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName.ToLower()}'";
+            var names = ExecuteReaderInsideConnection(getColumnsNamesSql);
+
+            string fieldsRaw = string.Empty;
+            var fnames = names.Skip(1).ToList();
+            var values = args.Skip(2).ToList();
+            foreach (var v in fnames)
+            {
+                if (v != null)
+                {
+                    fieldsRaw += $"{v.ElementAt(0)}, ";
+                }
+            }
+            var fields = fieldsRaw.Substring(0, fieldsRaw.Length - 2);
+
+            var dbValues = string.Empty;
+            foreach (var v in values)
+            {
+                dbValues += $"'{{{v}}}' ,";
+            }
+            var valuesString = dbValues.Substring(0, dbValues.Length - 2);
+
+
+            var sql = $"INSERT INTO {tableName} ({fields}) VALUES ({valuesString}, '{{{blockHash}}}', '{{{blockNumber}}}')";
+            ExecuteCommandInsideConnection(sql);
+        }
+
+        public string GetLastStorageValueByKey(TableName tableName, string value)
+        {
+            var sql = $"SELECT value FROM {tableName.ModuleName}{tableName.MethodName} WHERE key = '{{{value}}}'";
+            var result = ExecuteReaderInsideConnection(sql);
+
+            if (result.Count > 0)
+            {
+                var itm = result.Last();
+                string retvalue;
+
+                if (itm.FirstOrDefault() is object[])
+                {
+                    retvalue = ((string[])itm.FirstOrDefault())[0];
+                    // cut off square brackets
+                    retvalue = retvalue.Substring(1);
+                    retvalue = retvalue.Substring(0, retvalue.Length - 1);
+                }
+                else
+                {
+                    retvalue = itm.FirstOrDefault().ToString();
+                }
+
+                return retvalue;
+            }
+
+            return string.Empty;
         }
 
         public string GetLastStorageValue(TableName tableName, TableRow values)
@@ -502,7 +703,7 @@ namespace PolkaIndexer.DAL
                 // valiable does not exist
                 if (e.Data.Count != 0)
                 {
-                    throw e;
+                    throw;
                 }
 
                 //// 42703 - column does not exist

@@ -1,4 +1,5 @@
 ﻿using Polkadot.DataStructs.Metadata;
+using Polkadot.DataStructs.Metadata.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -21,7 +22,7 @@ namespace PolkaIndexer
         public string Signature { get; set; }
         public string Params { get; set; }
         public bool Unknown { get; set; }
-        public FunctionCallArgV8[] ParamsInfo { get; set; }
+        public IEnumerable<ICallArgument> ParamsInfo { get; set; }
         public object BlockHash { get; set; }
     }
 }

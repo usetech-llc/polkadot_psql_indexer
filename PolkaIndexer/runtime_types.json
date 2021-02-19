@@ -1,0 +1,30 @@
+{
+    "ClassId": "u64",
+    "TokenId": "u64",
+    "ClassData": "u64",
+    "TokenData": "u64",
+    "ReportReason": {
+      "_enum": [
+        "None",
+        "Illigal",
+        "Plagiarism",
+        "Duplicate",
+        "Reported"
+      ]
+    },
+    "ClassInfoOf": {
+      "metadata": "Vec<u8>",
+      "total_issuance": "TokenId",
+      "owner": "AccountId",
+      "class_data": "ClassData"
+    },
+    "ExtendedInfo": {
+      "display_flag": "bool",
+      "report": "ReportReason"
+    },
+    "TokenInfoOf": {
+      "metadata": "Vec<u8>",
+	    "owner": "AccountId",
+	    "class_data": "ClassData"
+    }
+}

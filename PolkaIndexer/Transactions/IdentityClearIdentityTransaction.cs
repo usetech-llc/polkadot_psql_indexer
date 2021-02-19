@@ -1,4 +1,5 @@
-﻿using Polkadot.Data;
+﻿using Polkadot.BinarySerializer;
+using Polkadot.Data;
 using Polkadot.DataStructs.Metadata;
 using Polkadot.Source.Utils;
 using Polkadot.Utils;
@@ -9,7 +10,7 @@ using System.Numerics;
 
 namespace PolkaIndexer
 {
-    internal class IdentityClearIdentityTransaction : ISpecificTransaction
+    internal class IdentityClearIdentityTransaction : SpecificTransaction
     {
         private IDatabaseAdapdable _dbAdapter;
         private Metadata _metadata;

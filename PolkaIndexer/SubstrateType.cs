@@ -34,6 +34,9 @@
         [Description("T::Moment")]
         Moment,
 
+        [Description("Moment")]
+        Moment2,
+
         [Description("bool")]
         BooleanType,
 

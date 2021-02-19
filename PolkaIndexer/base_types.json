@@ -1,0 +1,30 @@
+[
+  {
+    "Name": "u64",
+    "Size": "8"
+  },
+  {
+    "Name": "Vec",
+    "Size": "8"
+  },
+  {
+    "Name": "_enum",
+    "Size": "8"
+  },
+  {
+    "Name": "AccountId",
+    "Size": "8"
+  },
+  {
+    "Name": "bool",
+    "Size": "8"
+  },
+  {
+    "Name": "String",
+    "Size": "8"
+  },
+  {
+    "Name": "Balance",
+    "Size": "16"
+  }
+]
